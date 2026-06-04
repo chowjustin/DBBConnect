@@ -1,0 +1,198 @@
+[
+  {
+    "name": "Bambang",
+    "email": "Bambang.tutor@example.com",
+    "password": "securepassword",
+    "role": "TUTOR",
+    "phoneNumber": "0812345678972"
+  },
+  {
+    "name": "Budi",
+    "email": "Budi.student@example.com",
+    "password": "securepassword",
+    "role": "STUDENT",
+    "phoneNumber": "08123456788924"
+  },
+  {
+    "bio": "Strong interest in Chemistry and preparing for university entrance exams.",
+    "interests": [
+      "CHEMISTRY",
+      "PHYSICS"
+    ],
+    "school": "SMA Negeri 2 Jakarta"
+  },
+  {
+    "name": "Arif",
+    "email": "arif.student@example.com",
+    "password": "securepassword",
+    "role": "STUDENT",
+    "phoneNumber": "081555123411"
+  },
+  {
+  "bio": "Enthusiastic learner focusing on math and physics.",
+  "interests": ["MATH", "PHYSICS"],
+  "school": "SMA Negeri 1 Surabaya"
+},
+  {
+    "name": "Citra",
+    "email": "citra.student@example.com",
+    "password": "securepassword",
+    "role": "STUDENT",
+    "phoneNumber": "081555123412"
+  },
+  {
+  "bio": "Enjoys reading and improving English writing skills.",
+  "interests": ["ENGLISH"],
+  "school": "SMP Harapan Bangsa",
+  "profileImage": null
+  },
+  {
+    "name": "Eko",
+    "email": "eko.student@example.com",
+    "password": "securepassword",
+    "role": "STUDENT",
+    "phoneNumber": "081555123413"
+  },
+  {
+  "bio": "Economics major preparing for upcoming exams.",
+  "interests": ["ECONOMICS"],
+  "school": "Universitas Indonesia",
+  "profileImage": null
+  },  
+  {
+    "name": "Gita",
+    "email": "gita.student@example.com",
+    "password": "securepassword",
+    "role": "STUDENT",
+    "phoneNumber": "081555123414"
+  },
+  {
+  "bio": "Interested in science, especially chemistry and biology.",
+  "interests": ["CHEMISTRY"],
+  "school": "SMA Cendekia",
+  "profileImage": null
+  },
+  {
+    "name": "Hadi",
+    "email": "hadi.student@example.com",
+    "password": "securepassword",
+    "role": "STUDENT",
+    "phoneNumber": "081555123415"
+  },
+  {
+  "bio": "Computer science enthusiast learning algorithms.",
+  "interests": ["COMPUTER_SCIENCE"],
+  "school": "Institut Teknologi Sepuluh Nopember",
+  "profileImage": null
+  },
+
+  {
+    "name": "Nia",
+    "email": "nia.tutor@example.com",
+    "password": "securepassword",
+    "role": "TUTOR",
+    "phoneNumber": "081222987611",
+    "bio": "Expert in high-level Mathematics and Physics.",
+    "hourlyRate": 32,
+    "subjects": [
+      "MATH",
+      "PHYSICS"
+    ],
+    "availability": {
+      "monday": [
+        "10:00-12:00"
+      ],
+      "wednesday": [
+        "14:00-16:00"
+      ]
+    },
+    "experience": 4
+  },
+  {
+    "name": "Rudi",
+    "email": "rudi.tutor@example.com",
+    "password": "securepassword",
+    "role": "TUTOR",
+    "phoneNumber": "081222987612",
+    "bio": "Experienced tutor for Economics and Accounting.",
+    "hourlyRate": 28,
+    "subjects": [
+      "ECONOMICS",
+      "ACCOUNTING"
+    ],
+    "availability": {
+      "tuesday": [
+        "11:00-13:00"
+      ],
+      "thursday": [
+        "17:00-19:00"
+      ]
+    },
+    "experience": 3
+  },
+  {
+    "name": "Shinta",
+    "email": "shinta.tutor@example.com",
+    "password": "securepassword",
+    "role": "TUTOR",
+    "phoneNumber": "081222987613",
+    "bio": "Focus on English grammar, literature, and essay writing.",
+    "hourlyRate": 25,
+    "subjects": [
+      "ENGLISH"
+    ],
+    "availability": {
+      "friday": [
+        "09:00-11:00"
+      ],
+      "saturday": [
+        "13:00-15:00"
+      ]
+    },
+    "experience": 2
+  },
+  {
+    "name": "Bima",
+    "email": "bima.tutor@example.com",
+    "password": "securepassword",
+    "role": "TUTOR",
+    "phoneNumber": "081222987614",
+    "bio": "Software developer helping with Computer Science concepts.",
+    "hourlyRate": 35,
+    "subjects": [
+      "COMPUTER_SCIENCE",
+      "MATH"
+    ],
+    "availability": {
+      "monday": [
+        "18:00-20:00"
+      ],
+      "sunday": [
+        "10:00-12:00"
+      ]
+    },
+    "experience": 5
+  },
+  {
+    "name": "Luna",
+    "email": "luna.tutor@example.com",
+    "password": "securepassword",
+    "role": "TUTOR",
+    "phoneNumber": "081222987615",
+    "bio": "University researcher specializing in Chemistry and Physics.",
+    "hourlyRate": 30,
+    "subjects": [
+      "CHEMISTRY",
+      "PHYSICS"
+    ],
+    "availability": {
+      "tuesday": [
+        "15:00-17:00"
+      ],
+      "thursday": [
+        "10:00-12:00"
+      ]
+    },
+    "experience": 3
+  }
+]

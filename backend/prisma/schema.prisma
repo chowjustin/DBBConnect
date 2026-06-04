@@ -1,0 +1,155 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  TUTOR
+  STUDENT
+  ADMIN
+}
+
+enum ApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+}
+
+enum Subject {
+  MATH
+  PHYSICS
+  CHEMISTRY
+  ENGLISH
+  COMPUTER_SCIENCE
+  ECONOMICS
+  ACCOUNTING
+}
+
+
+model User {
+  id             String          @id @default(cuid())
+  name           String
+  email          String          @unique
+  password       String
+  phoneNumber    String          @unique
+  role           UserRole
+  refreshToken   String?
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+
+  tutorProfile    TutorProfile?   @relation("TutorUser")
+  studentProfile  StudentProfile? @relation("StudentUser")
+  uploads         FileUpload[]
+}
+
+model TutorProfile {
+  id            String          @id @default(cuid())
+  userId        String          @unique
+  bio           String?
+  subjects      Subject[]            
+  experience    Int?
+  availability  Json?
+  hourlyRate    Float?
+  profileImage  String? 
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  user          User            @relation("TutorUser", fields: [userId], references: [id])
+  applications  Application[]   @relation("TutorApplications")
+  reviews       Review[]
+  uploads       FileUpload[]
+  materials     Material[]
+  students      StudentProfile[] @relation("TutorStudents")
+}
+
+model StudentProfile {
+  id            String          @id @default(cuid())
+  userId        String          @unique
+  bio           String?
+  interests     Subject[]        
+  school        String?         
+  profileImage  String?
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  user          User            @relation("StudentUser", fields: [userId], references: [id])
+  uploads       FileUpload[]
+  reviews       Review[]
+  tutors        TutorProfile[]  @relation("TutorStudents")
+  applications  Application[]   @relation("StudentApplications")
+
+  materialAccesses MaterialAccess[] 
+}
+
+
+
+model Application {
+  id            String          @id @default(cuid())
+  studentId     String
+  tutorId       String
+  status        ApplicationStatus @default(PENDING)
+  requestedAt   DateTime        @default(now())
+  scheduledAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  student       StudentProfile   @relation("StudentApplications", fields: [studentId], references: [id])
+  tutor         TutorProfile     @relation("TutorApplications", fields: [tutorId], references: [id])
+}
+
+model Review {
+  id        String   @id @default(cuid())
+  rating    Int
+  comment   String?
+  tutorId   String
+  studentId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  tutor     TutorProfile   @relation(fields: [tutorId], references: [id])
+  student   StudentProfile @relation(fields: [studentId], references: [id])
+}
+
+model FileUpload {
+  id            String          @id @default(cuid())
+  userId        String
+  tutorId       String?
+  studentId     String?
+  fileName      String
+  filePath      String
+  fileType      String
+  createdAt     DateTime        @default(now())
+
+  user          User            @relation(fields: [userId], references: [id])
+  tutor         TutorProfile?   @relation(fields: [tutorId], references: [id])
+  student       StudentProfile? @relation(fields: [studentId], references: [id])
+}
+
+model Material {
+  id        String   @id @default(cuid())
+  title     String
+  fileUrl   String
+  tutorId   String
+  createdAt DateTime @default(now())
+
+  tutor           TutorProfile     @relation(fields: [tutorId], references: [id])
+  allowedStudents MaterialAccess[] @relation("MaterialToAccess")
+}
+
+model MaterialAccess {
+  id         String   @id @default(cuid())
+
+  materialId String
+  studentId  String
+
+  material   Material        @relation("MaterialToAccess", fields: [materialId], references: [id])
+  student    StudentProfile  @relation(fields: [studentId], references: [id])
+}
+
+
+
+
