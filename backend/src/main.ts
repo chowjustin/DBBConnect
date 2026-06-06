@@ -14,12 +14,11 @@ async function bootstrap() {
   app.useStaticAssets(join(__dirname, '..', 'uploads'));
 
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-  prefix: '/uploads',
-});
+    prefix: '/uploads',
+  });
 
+  app.setGlobalPrefix('api');
 
-  app.setGlobalPrefix('api'); 
-
-  await app.listen(3000);
+  await app.listen(process.env.PORT || 8000);
 }
 bootstrap();

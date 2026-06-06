@@ -1,0 +1,32 @@
+version: '3.9'
+
+services:
+  postgres:
+    image: postgres:17
+    container_name: dbbconnect-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: pg
+    ports:
+      - '5437:5432'
+    volumes:
+      - dbbconnect_pgdata:/var/lib/postgresql/data
+
+  postgres_test:
+    image: postgres:17
+    container_name: dbbconnect-postgres-test
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: user
+      POSTGRES_DB: pg_test
+    ports:
+      - '5438:5432'
+    volumes:
+      - dbbconnect_pgdata_test:/var/lib/postgresql/data
+
+volumes:
+  dbbconnect_pgdata:
+  dbbconnect_pgdata_test:
