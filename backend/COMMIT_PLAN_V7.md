@@ -422,7 +422,7 @@ Reward amounts in env: `REFERRAL_REWARD_REFERRER_RUPIAH`, `REFERRAL_REWARD_REFER
 
 ---
 
-### Commit 9 — [ ] `feat(be): search filters, rating, featured boost, leaderboard and rate suggestion`
+### Commit 9 — [x] `feat(be): search filters, rating, featured boost, leaderboard and rate suggestion`
 - `tutors.service.search`: accept `minRating`, `educationLevel`, `methods[]`, `format[]`, `mode[]`, `sortBy` (`rating`, `priceAsc`, `priceDesc`, `featured`). Default sort boosts active `FeaturedListing`, marks `featured: true`. Filter only `publishedAt != null` + `verificationStatus = VERIFIED`.
 - Compute `averageRating` via Prisma `aggregate`. Merge into response.
 - `materials.service` list endpoints: accept `subject`, `level`, `kind` filters.

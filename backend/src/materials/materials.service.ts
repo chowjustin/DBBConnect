@@ -3,6 +3,7 @@ import {
   ForbiddenException,
   Injectable,
 } from '@nestjs/common';
+import { EducationLevel, MaterialKind, Subject } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
@@ -73,28 +74,38 @@ export class MaterialsService {
     };
   }
 
-  async getMaterialsForTutor(tutorProfileId: string) {
+  async getMaterialsForTutor(
+    tutorProfileId: string,
+    filters?: { subject?: Subject; level?: EducationLevel; kind?: MaterialKind },
+  ) {
     return this.prisma.material.findMany({
-      where: { tutorId: tutorProfileId },
+      where: {
+        tutorId: tutorProfileId,
+        subject: filters?.subject,
+        level: filters?.level,
+        kind: filters?.kind,
+      },
       include: {
         allowedStudents: {
-          include: {
-            student: { include: { user: true } },
-          },
+          include: { student: { include: { user: true } } },
         },
       },
       orderBy: { createdAt: 'desc' },
     });
   }
 
-  async getMaterialsForStudent(studentProfileId: string) {
+  async getMaterialsForStudent(
+    studentProfileId: string,
+    filters?: { subject?: Subject; level?: EducationLevel; kind?: MaterialKind },
+  ) {
     return this.prisma.material.findMany({
       where: {
         allowedStudents: { some: { studentId: studentProfileId } },
+        subject: filters?.subject,
+        level: filters?.level,
+        kind: filters?.kind,
       },
-      include: {
-        tutor: { include: { user: true } },
-      },
+      include: { tutor: { include: { user: true } } },
       orderBy: { createdAt: 'desc' },
     });
   }
