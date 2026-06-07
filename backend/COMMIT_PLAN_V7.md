@@ -198,7 +198,7 @@ Drop: `Application.scheduledAt`, `TutorProfile.availability Json?`.
 
 ---
 
-### Commit 5 — [ ] `feat(be): photo-first payment, platform bank settings and idempotency`
+### Commit 5 — [x] `feat(be): photo-first payment, platform bank settings and idempotency`
 **Schema:**
 ```prisma
 enum PaymentStatus { UNDER_REVIEW CONFIRMED REJECTED REFUNDED }

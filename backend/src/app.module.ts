@@ -16,6 +16,8 @@ import { MaterialsModule } from './materials/materials.module';
 import { AdminModule } from './admin/admin.module';
 import { AvailabilityModule } from './availability/availability.module';
 import { SessionsModule } from './sessions/sessions.module';
+import { PlatformBankModule } from './platform-bank/platform-bank.module';
+import { PaymentsModule } from './payments/payments.module';
 
 @Module({
   imports: [
@@ -34,6 +36,8 @@ import { SessionsModule } from './sessions/sessions.module';
     AdminModule,
     AvailabilityModule,
     SessionsModule,
+    PlatformBankModule,
+    PaymentsModule,
   ],
   controllers: [AppController],
   providers: [
