@@ -24,6 +24,7 @@ import { FeaturedModule } from './featured/featured.module';
 import { PromoModule } from './promo/promo.module';
 import { ReferralsModule } from './referrals/referrals.module';
 import { DashboardsModule } from './dashboards/dashboards.module';
+import { TrackingModule } from './tracking/tracking.module';
 
 @Module({
   imports: [
@@ -50,6 +51,7 @@ import { DashboardsModule } from './dashboards/dashboards.module';
     PromoModule,
     ReferralsModule,
     DashboardsModule,
+    TrackingModule,
   ],
   controllers: [AppController],
   providers: [

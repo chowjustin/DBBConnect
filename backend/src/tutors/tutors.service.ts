@@ -13,6 +13,7 @@ import {
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
+import { TrackingService } from '../tracking/tracking.service';
 import { UpdateTutorDto } from './dto/update-tutor.dto';
 
 const COMPLETENESS_WEIGHTS = {
@@ -35,6 +36,7 @@ export class TutorsService {
   constructor(
     private prisma: PrismaService,
     private mailService: MailService,
+    private tracking: TrackingService,
   ) {}
 
   computeCompleteness(
@@ -292,6 +294,9 @@ export class TutorsService {
         return b.averageRating - a.averageRating;
       });
     }
+
+    // log search analytics (fire-and-forget)
+    this.tracking.logSearch(null, opts as any, enriched.length);
 
     return enriched;
   }

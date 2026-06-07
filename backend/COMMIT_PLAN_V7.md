@@ -461,7 +461,7 @@ New: `UserActivity { userId, lastSeenAt }` upsert via interceptor on authenticat
 
 ---
 
-### Commit 11 — [ ] `feat(be): material view tracking, session feedback and search analytics`
+### Commit 11 — [x] `feat(be): material view tracking, session feedback and search analytics`
 **Schema:**
 ```prisma
 model MaterialView {
