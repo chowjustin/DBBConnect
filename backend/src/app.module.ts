@@ -23,6 +23,7 @@ import { SubscriptionModule } from './subscription/subscription.module';
 import { FeaturedModule } from './featured/featured.module';
 import { PromoModule } from './promo/promo.module';
 import { ReferralsModule } from './referrals/referrals.module';
+import { DashboardsModule } from './dashboards/dashboards.module';
 
 @Module({
   imports: [
@@ -48,6 +49,7 @@ import { ReferralsModule } from './referrals/referrals.module';
     FeaturedModule,
     PromoModule,
     ReferralsModule,
+    DashboardsModule,
   ],
   controllers: [AppController],
   providers: [

@@ -438,7 +438,7 @@ Reward amounts in env: `REFERRAL_REWARD_REFERRER_RUPIAH`, `REFERRAL_REWARD_REFER
 
 ---
 
-### Commit 10 — [ ] `feat(be): dashboards, analytics for tutor, student and admin`
+### Commit 10 — [x] `feat(be): dashboards, analytics for tutor, student and admin`
 **Tutor:**
 - `GET /dashboards/tutor` (`@Roles(TUTOR)`): active students, pending applications, upcoming sessions, materials count, average rating, recent reviews (top 5), monthly confirmed earnings.
 - `GET /dashboards/tutor/analytics`: sessions per week (12w), earnings trend (12w), application → accepted → completed funnel, rating trend monthly, most-accessed materials.
