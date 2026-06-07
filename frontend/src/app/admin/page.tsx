@@ -24,7 +24,7 @@ export default function AdminDashboardPage() {
         title='Dashboard Admin'
         description='Antrian verifikasi, pembayaran dan pencairan.'
       />
-      <div className='grid gap-4 sm:grid-cols-3'>
+      <div className='stagger-children grid gap-4 sm:grid-cols-3'>
         <KpiCard
           icon={UserCheck}
           accent='primary'

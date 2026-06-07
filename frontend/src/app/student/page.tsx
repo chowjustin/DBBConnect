@@ -25,7 +25,7 @@ export default function StudentDashboardPage() {
         title='Dashboard Siswa'
         description='Pantau sesi, pembayaran dan materi belajar Anda.'
       />
-      <div className='grid gap-4 sm:grid-cols-3'>
+      <div className='stagger-children grid gap-4 sm:grid-cols-3'>
         <KpiCard
           icon={CalendarDays}
           accent='primary'

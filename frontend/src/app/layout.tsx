@@ -1,7 +1,7 @@
-import type { Metadata } from 'next';
 import { JetBrains_Mono } from 'next/font/google';
 import './globals.css';
 import { Providers } from './providers';
+import { buildMetadata } from '@/config/seo';
 
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
@@ -9,19 +9,10 @@ const jetbrains = JetBrains_Mono({
   display: 'swap',
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: 'DBBConnect — Marketplace tutor dan siswa',
-    template: '%s | DBBConnect',
-  },
-  description:
-    'Cari tutor terverifikasi, jadwalkan sesi, dan kelola pembayaran dalam satu platform.',
-  applicationName: 'DBBConnect',
-  authors: [{ name: 'DBBConnect' }],
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL ?? 'http://localhost:3000',
-  ),
-};
+export const metadata = buildMetadata({
+  title: 'Marketplace tutor dan siswa',
+  path: '/',
+});
 
 export default function RootLayout({
   children,

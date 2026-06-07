@@ -153,7 +153,9 @@ export function DashboardLayout({ role, user, children }: DashboardLayoutProps) 
             </DropdownMenuContent>
           </DropdownMenu>
         </header>
-        <main className='dashboard-layout py-8'>{children}</main>
+        <main className='dashboard-layout animate-page-in py-8'>
+          {children}
+        </main>
       </SidebarInset>
     </SidebarProvider>
   );
