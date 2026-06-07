@@ -526,7 +526,7 @@ model SearchLog {
 
 ---
 
-### Commit 13 — [ ] `chore(be): retention crons, openapi docs and dev tooling`
+### Commit 13 — [x] `chore(be): retention crons, openapi docs and dev tooling`
 Polish + ops hygiene.
 
 - Retention crons: clean `MaterialView`, `SearchLog` > 90d, `IdempotencyKey` > 7d, `PasswordResetToken`, `EmailVerificationToken` past expiry.
