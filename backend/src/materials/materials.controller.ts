@@ -1,59 +1,87 @@
 import {
+  Body,
   Controller,
-  Post,
+  ForbiddenException,
   Get,
   Param,
-  Body,
+  Post,
+  Req,
   UploadedFile,
+  UseGuards,
   UseInterceptors,
-} from "@nestjs/common";
-import { FileInterceptor } from "@nestjs/platform-express";
-import { diskStorage } from "multer";
-import { extname } from "path";
-import { MaterialsService } from "./materials.service";
+} from '@nestjs/common';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { UserRole } from '@prisma/client';
+import type { Request } from 'express';
+import { MaterialsService } from './materials.service';
+import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { RolesGuard } from '../auth/roles.guard';
+import { Roles } from '../auth/roles.decorator';
+import {
+  materialFileFilter,
+  multerLimits,
+  multerStorage,
+} from '../upload/multer.config';
 
-@Controller("materials")
+type AuthedRequest = Request & {
+  user: { sub: string; email: string; role: UserRole };
+};
+
+@UseGuards(JwtAuthGuard, RolesGuard)
+@Controller('materials')
 export class MaterialsController {
   constructor(private readonly materialsService: MaterialsService) {}
 
-  @Post("upload/:tutorProfileId")
-@UseInterceptors(
-  FileInterceptor("file", {
-    storage: diskStorage({
-      destination: "./uploads/materials",
-      filename: (req, file, cb) => {
-        const unique = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        cb(null, unique + extname(file.originalname));
-      },
+  @Roles(UserRole.TUTOR)
+  @Post('upload')
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: multerStorage,
+      fileFilter: materialFileFilter,
+      limits: multerLimits,
     }),
-  })
-)
-async uploadMaterial(
-  @UploadedFile() file: Express.Multer.File,
-  @Param("tutorProfileId") tutorProfileId: string,
-  @Body("allowedStudents") allowedStudents: string | string[]
-) {
-  // Normalize to array
-  const studentsArray = Array.isArray(allowedStudents)
-    ? allowedStudents
-    : allowedStudents
-    ? [allowedStudents]
-    : [];
+  )
+  async uploadMaterial(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: AuthedRequest,
+    @Body('allowedStudents') allowedStudents: string | string[],
+  ) {
+    const studentsArray = Array.isArray(allowedStudents)
+      ? allowedStudents
+      : allowedStudents
+        ? [allowedStudents]
+        : [];
 
-  return this.materialsService.uploadMaterial(
-    file,
-    tutorProfileId,
-    studentsArray
-  );
-}
-
-  @Get("tutor/:tutorProfileId")
-  async getTutorMaterials(@Param("tutorProfileId") id: string) {
-    return this.materialsService.getMaterialsForTutor(id);
+    return this.materialsService.uploadMaterial(
+      file,
+      req.user.sub,
+      studentsArray,
+    );
   }
 
-  @Get("student/:studentProfileId")
-  async getStudentMaterials(@Param("studentProfileId") id: string) {
-    return this.materialsService.getMaterialsForStudent(id);
+  @Get('tutor/:tutorProfileId')
+  async getTutorMaterials(
+    @Param('tutorProfileId') tutorProfileId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    const ok = await this.materialsService.userOwnsTutorProfile(
+      req.user.sub,
+      tutorProfileId,
+    );
+    if (!ok) throw new ForbiddenException('Not your tutor profile');
+    return this.materialsService.getMaterialsForTutor(tutorProfileId);
+  }
+
+  @Get('student/:studentProfileId')
+  async getStudentMaterials(
+    @Param('studentProfileId') studentProfileId: string,
+    @Req() req: AuthedRequest,
+  ) {
+    const ok = await this.materialsService.userOwnsStudentProfile(
+      req.user.sub,
+      studentProfileId,
+    );
+    if (!ok) throw new ForbiddenException('Not your student profile');
+    return this.materialsService.getMaterialsForStudent(studentProfileId);
   }
 }
