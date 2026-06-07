@@ -1,6 +1,8 @@
 'use client';
 
+import * as React from 'react';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { UserCheck, ZoomIn } from 'lucide-react';
 
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -13,6 +15,9 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
+import { PageHeader } from '@/components/ui/page-header';
+import { EmptyState } from '@/components/ui/empty-state';
+import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { resolveFileUrl } from '@/lib/file-url';
 import { usePagination } from '@/hooks/use-pagination';
 import { notifyAxiosError, notifySuccess } from '@/lib/toast';
@@ -29,6 +34,9 @@ interface VerificationItem {
 export default function AdminVerificationsPage() {
   const qc = useQueryClient();
   const { params } = usePagination();
+
+  const [slides, setSlides] = React.useState<{ src: string }[]>([]);
+  const [open, setOpen] = React.useState(false);
 
   const { data, isLoading } = useQuery<{
     data: VerificationItem[];
@@ -64,11 +72,34 @@ export default function AdminVerificationsPage() {
     onError: (e) => notifyAxiosError(e),
   });
 
+  const showDocs = (v: VerificationItem) => {
+    const list: { src: string }[] = [];
+    if (v.idDocumentUrl) list.push({ src: resolveFileUrl(v.idDocumentUrl) });
+    if (v.educationProofUrl)
+      list.push({ src: resolveFileUrl(v.educationProofUrl) });
+    if (!list.length) return;
+    setSlides(list);
+    setOpen(true);
+  };
+
+  const empty = !isLoading && (data?.data.length ?? 0) === 0;
+
   return (
-    <div className='space-y-4'>
-      <h1 className='h2'>Verifikasi Tutor</h1>
+    <div className='space-y-6'>
+      <PageHeader
+        icon={UserCheck}
+        title='Verifikasi Tutor'
+        description='Tinjau dokumen identitas dan ijazah.'
+      />
+
       {isLoading ? (
         <Skeleton className='h-40 w-full' />
+      ) : empty ? (
+        <EmptyState
+          icon={UserCheck}
+          title='Tidak ada antrian'
+          description='Semua tutor terverifikasi sudah ditinjau.'
+        />
       ) : (
         <Table>
           <TableHeader>
@@ -82,32 +113,25 @@ export default function AdminVerificationsPage() {
             {data?.data.map((v) => (
               <TableRow key={v.id}>
                 <TableCell>
-                  <div>{v.user.name}</div>
+                  <div className='font-medium'>{v.user.name}</div>
                   <div className='text-muted-foreground text-xs'>
                     {v.user.email}
                   </div>
                 </TableCell>
-                <TableCell className='space-x-2 text-xs'>
-                  {v.idDocumentUrl ? (
-                    <a
-                      href={resolveFileUrl(v.idDocumentUrl)}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-primary underline'
+                <TableCell>
+                  {v.idDocumentUrl || v.educationProofUrl ? (
+                    <button
+                      type='button'
+                      onClick={() => showDocs(v)}
+                      className='text-primary-600 hover:text-primary-700 inline-flex items-center gap-1 text-xs font-medium'
                     >
-                      KTP
-                    </a>
-                  ) : null}
-                  {v.educationProofUrl ? (
-                    <a
-                      href={resolveFileUrl(v.educationProofUrl)}
-                      target='_blank'
-                      rel='noopener noreferrer'
-                      className='text-primary underline'
-                    >
-                      Ijazah
-                    </a>
-                  ) : null}
+                      <ZoomIn className='size-3.5' /> Lihat dokumen
+                    </button>
+                  ) : (
+                    <span className='text-muted-foreground text-xs'>
+                      Belum upload
+                    </span>
+                  )}
                 </TableCell>
                 <TableCell>
                   <div className='flex gap-2'>
@@ -141,6 +165,8 @@ export default function AdminVerificationsPage() {
           </TableBody>
         </Table>
       )}
+
+      <ImageLightbox open={open} onClose={() => setOpen(false)} slides={slides} />
     </div>
   );
 }

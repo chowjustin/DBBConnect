@@ -1,6 +1,8 @@
 'use client';
 
+import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { CreditCard, ZoomIn } from 'lucide-react';
 
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
@@ -14,6 +16,8 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { PageHeader } from '@/components/ui/page-header';
+import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { formatDateTimeId, formatRupiah } from '@/lib/format';
 import { resolveFileUrl } from '@/lib/file-url';
 import { usePagination } from '@/hooks/use-pagination';
@@ -38,9 +42,15 @@ export default function AdminPaymentsPage() {
     },
   });
 
+  const [lightboxSrc, setLightboxSrc] = React.useState<string | null>(null);
+
   return (
-    <div className='space-y-4'>
-      <h1 className='h2'>Antrian Pembayaran</h1>
+    <div className='space-y-6'>
+      <PageHeader
+        icon={CreditCard}
+        title='Antrian Pembayaran'
+        description='Verifikasi bukti pembayaran dari siswa.'
+      />
       {isLoading ? (
         <Skeleton className='h-40 w-full' />
       ) : (
@@ -61,20 +71,23 @@ export default function AdminPaymentsPage() {
                 <TableRow key={p.id}>
                   <TableCell>{formatDateTimeId(p.createdAt)}</TableCell>
                   <TableCell>{p.kind}</TableCell>
-                  <TableCell>{formatRupiah(p.netAmount)}</TableCell>
+                  <TableCell className='mono'>
+                    {formatRupiah(p.netAmount)}
+                  </TableCell>
                   <TableCell>
                     <StatusBadge kind='payment' status={p.status} />
                   </TableCell>
                   <TableCell>
                     {p.proofUrl ? (
-                      <a
-                        href={resolveFileUrl(p.proofUrl)}
-                        target='_blank'
-                        rel='noopener noreferrer'
-                        className='text-primary text-xs underline'
+                      <button
+                        type='button'
+                        onClick={() =>
+                          setLightboxSrc(resolveFileUrl(p.proofUrl!))
+                        }
+                        className='text-primary-600 hover:text-primary-700 inline-flex items-center gap-1 text-xs font-medium'
                       >
-                        Lihat
-                      </a>
+                        <ZoomIn className='size-3.5' /> Lihat
+                      </button>
                     ) : (
                       '—'
                     )}
@@ -111,6 +124,11 @@ export default function AdminPaymentsPage() {
           </TableBody>
         </Table>
       )}
+      <ImageLightbox
+        open={!!lightboxSrc}
+        onClose={() => setLightboxSrc(null)}
+        slides={lightboxSrc ? [{ src: lightboxSrc }] : []}
+      />
     </div>
   );
 }
