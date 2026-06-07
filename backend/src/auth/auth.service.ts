@@ -6,12 +6,16 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcryptjs';
-import { randomUUID } from 'crypto';
+import { randomBytes, randomUUID } from 'crypto';
 import { PrismaService } from '../prisma/prisma.service';
+import { MailService } from '../mail/mail.service';
 import { LoginDto } from './dto/login.dto';
 import { RegisterDto } from './dto/register.dto';
 import { RefreshTokenDto } from './dto/refresh-token.dto';
 import { Prisma, UserRole } from '@prisma/client';
+
+const RESET_TOKEN_TTL_MS = 60 * 60 * 1000; // 1h
+const VERIFY_TOKEN_TTL_MS = 24 * 60 * 60 * 1000; // 24h
 
 type TokenUser = { id: string; email: string; role: UserRole };
 
@@ -20,7 +24,21 @@ export class AuthService {
   constructor(
     private prisma: PrismaService,
     private jwtService: JwtService,
+    private mailService: MailService,
   ) {}
+
+  private generateToken(): { plain: string; hash: string } {
+    const plain = randomBytes(32).toString('hex');
+    const hash = require('crypto')
+      .createHash('sha256')
+      .update(plain)
+      .digest('hex');
+    return { plain, hash };
+  }
+
+  private frontendUrl() {
+    return process.env.FRONTEND_URL || 'http://localhost:3000';
+  }
 
   private generateTokens(user: TokenUser) {
     const payload = { sub: user.id, email: user.email, role: user.role };
@@ -106,6 +124,11 @@ export class AuthService {
       const { accessToken, refreshToken } = this.generateTokens(user);
       await this.updateRefreshToken(user.id, refreshToken);
 
+      // fire-and-forget email verification
+      this.sendVerificationToken(user.id, user.email).catch((err) =>
+        console.error('Failed to send verification email', err),
+      );
+
       return {
         access_token: accessToken,
         refresh_token: refreshToken,
@@ -127,6 +150,87 @@ export class AuthService {
       if (error instanceof BadRequestException) throw error;
       throw new BadRequestException('Failed to register user');
     }
+  }
+
+  private async sendVerificationToken(userId: string, email: string) {
+    const { plain, hash } = this.generateToken();
+    await this.prisma.emailVerificationToken.create({
+      data: {
+        userId,
+        tokenHash: hash,
+        expiresAt: new Date(Date.now() + VERIFY_TOKEN_TTL_MS),
+      },
+    });
+    const url = `${this.frontendUrl()}/verify-email?token=${plain}`;
+    await this.mailService.sendEmailVerification(email, url);
+  }
+
+  async resendVerification(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user || user.emailVerifiedAt) return { ok: true };
+    await this.sendVerificationToken(user.id, user.email);
+    return { ok: true };
+  }
+
+  async verifyEmail(plainToken: string) {
+    const hash = require('crypto')
+      .createHash('sha256')
+      .update(plainToken)
+      .digest('hex');
+    const row = await this.prisma.emailVerificationToken.findFirst({
+      where: { tokenHash: hash, usedAt: null, expiresAt: { gt: new Date() } },
+    });
+    if (!row) throw new BadRequestException('Invalid or expired token');
+    await this.prisma.$transaction([
+      this.prisma.emailVerificationToken.update({
+        where: { id: row.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.user.update({
+        where: { id: row.userId },
+        data: { emailVerifiedAt: new Date() },
+      }),
+    ]);
+    return { ok: true };
+  }
+
+  async forgotPassword(email: string) {
+    const user = await this.prisma.user.findUnique({ where: { email } });
+    if (!user) return { ok: true }; // no enumeration
+    const { plain, hash } = this.generateToken();
+    await this.prisma.passwordResetToken.create({
+      data: {
+        userId: user.id,
+        tokenHash: hash,
+        expiresAt: new Date(Date.now() + RESET_TOKEN_TTL_MS),
+      },
+    });
+    const url = `${this.frontendUrl()}/reset-password?token=${plain}`;
+    await this.mailService.sendPasswordResetEmail(user.email, url);
+    return { ok: true };
+  }
+
+  async resetPassword(plainToken: string, newPassword: string) {
+    const hash = require('crypto')
+      .createHash('sha256')
+      .update(plainToken)
+      .digest('hex');
+    const row = await this.prisma.passwordResetToken.findFirst({
+      where: { tokenHash: hash, usedAt: null, expiresAt: { gt: new Date() } },
+    });
+    if (!row) throw new BadRequestException('Invalid or expired token');
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    await this.prisma.$transaction([
+      this.prisma.passwordResetToken.update({
+        where: { id: row.id },
+        data: { usedAt: new Date() },
+      }),
+      this.prisma.user.update({
+        where: { id: row.userId },
+        data: { password: hashedPassword, refreshToken: null },
+      }),
+    ]);
+    return { ok: true };
   }
 
   async login(loginDto: LoginDto) {

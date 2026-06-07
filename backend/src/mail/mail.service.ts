@@ -58,6 +58,24 @@ export class MailService {
     );
   }
 
+  async sendPasswordResetEmail(email: string, resetUrl: string) {
+    return this.sendEmail(
+      email,
+      'Reset your password',
+      `Reset your password: ${resetUrl}`,
+      `<h2>Reset password</h2><p>Click the link below within 1 hour:</p><p><a href="${resetUrl}">${resetUrl}</a></p>`,
+    );
+  }
+
+  async sendEmailVerification(email: string, verifyUrl: string) {
+    return this.sendEmail(
+      email,
+      'Verify your email',
+      `Verify your email: ${verifyUrl}`,
+      `<h2>Verify email</h2><p>Click the link below within 24 hours:</p><p><a href="${verifyUrl}">${verifyUrl}</a></p>`,
+    );
+  }
+
   // 🟣 3. Tutor updates status → notify student
   async sendStudentStatusUpdateEmail(
     studentEmail: string,

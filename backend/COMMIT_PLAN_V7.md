@@ -68,7 +68,7 @@ Migration note: backfill existing tutor `whatsappNumber` with empty string; bloc
 
 ---
 
-### Commit 2 — [ ] `feat(be): email verification and password reset`
+### Commit 2 — [x] `feat(be): email verification and password reset`
 **Schema:**
 - `User.emailVerifiedAt DateTime?`.
 - `PasswordResetToken { id, userId, tokenHash, expiresAt, usedAt, createdAt }`. Index `[userId, expiresAt]`.
