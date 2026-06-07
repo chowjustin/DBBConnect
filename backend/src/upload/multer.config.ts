@@ -11,6 +11,8 @@ const FIELD_TO_FOLDER: Record<string, string> = {
   'profile-picture': './uploads/profile',
   material: './uploads/materials',
   file: './uploads/materials',
+  'verification-doc': './uploads/verification',
+  proofImage: './uploads/payments',
 };
 
 export const multerStorage = diskStorage({

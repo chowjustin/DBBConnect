@@ -9,11 +9,12 @@ import * as path from 'path';
 import type { Request } from 'express';
 import { PrismaService } from '../prisma/prisma.service';
 
-export type UploadKind = 'profile' | 'material';
+export type UploadKind = 'profile' | 'material' | 'verification';
 
 const KIND_TO_FOLDER: Record<UploadKind, string> = {
   profile: 'profile',
   material: 'materials',
+  verification: 'verification',
 };
 
 @Injectable()

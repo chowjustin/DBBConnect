@@ -16,6 +16,7 @@ import type { Request } from 'express';
 import { UploadService } from './upload.service';
 import {
   imageFileFilter,
+  materialFileFilter,
   multerLimits,
   multerStorage,
 } from './multer.config';
@@ -40,6 +41,27 @@ export class UploadController {
   ) {
     if (!file) throw new BadRequestException('No file uploaded');
     return this.uploadService.saveProfilePicture(req.user.sub, file, req);
+  }
+
+  /**
+   * Generic verification document upload (KTP, ijazah). Returns
+   * { file_url, path } so the client can attach paths to POST /tutors/verification.
+   */
+  @Post('verification-doc')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('verification-doc', {
+      storage: multerStorage,
+      fileFilter: materialFileFilter,
+      limits: { fileSize: 5 * 1024 * 1024 },
+    }),
+  )
+  async uploadVerificationDoc(
+    @UploadedFile() file: Express.Multer.File,
+    @Req() req: Request,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    return this.uploadService.buildFileInfo(req, 'verification', file.filename);
   }
 
   @Get('material/:materialId')
