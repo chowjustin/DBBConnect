@@ -1,7 +1,10 @@
 import { Module } from '@nestjs/common';
+import { APP_FILTER, APP_GUARD } from '@nestjs/core';
+import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
+import { PrismaExceptionFilter } from './prisma/prisma-exception.filter';
 import { AuthModule } from './auth/auth.module';
 import { UploadModule } from './upload/upload.module';
 import { UsersModule } from './users/users.module';
@@ -12,8 +15,25 @@ import { ApplicationsModule } from './applications/applications.module';
 import { MaterialsModule } from './materials/materials.module';
 
 @Module({
-  imports: [PrismaModule, UsersModule, AuthModule, UploadModule, TutorsModule, StudentsModule, ReviewsModule, ApplicationsModule, MaterialsModule],
+  imports: [
+    ThrottlerModule.forRoot([
+      { name: 'default', ttl: 60_000, limit: 100 },
+    ]),
+    PrismaModule,
+    UsersModule,
+    AuthModule,
+    UploadModule,
+    TutorsModule,
+    StudentsModule,
+    ReviewsModule,
+    ApplicationsModule,
+    MaterialsModule,
+  ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    { provide: APP_GUARD, useClass: ThrottlerGuard },
+    { provide: APP_FILTER, useClass: PrismaExceptionFilter },
+  ],
 })
 export class AppModule {}
