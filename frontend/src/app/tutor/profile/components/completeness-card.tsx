@@ -9,6 +9,24 @@ interface Props {
   isLoading: boolean;
 }
 
+const FIELD_LABELS: Record<string, string> = {
+  bio: 'Bio',
+  educationBackground: 'Latar Belakang Pendidikan',
+  teachingMethods: 'Metode Mengajar',
+  educationLevels: 'Jenjang yang Diajar',
+  subjects: 'Mata Pelajaran',
+  hourlyRate: 'Tarif per Jam',
+  introVideoUrl: 'Video Perkenalan',
+  whatsappNumber: 'Nomor WhatsApp',
+  bank: 'Rekening Bank',
+  availability: 'Jadwal Ketersediaan',
+  verification: 'Verifikasi Admin',
+};
+
+function label(key: string): string {
+  return FIELD_LABELS[key] ?? key;
+}
+
 export function CompletenessCard({ data, isLoading }: Props) {
   if (isLoading || !data) {
     return (
@@ -26,11 +44,15 @@ export function CompletenessCard({ data, isLoading }: Props) {
   const ready = data.score >= data.minRequired;
 
   return (
-    <Card>
+    <Card className='hover:shadow-primary-500/5 transition-shadow hover:shadow-md'>
       <CardHeader>
-        <CardTitle className='flex items-center justify-between'>
+        <CardTitle className='flex items-center justify-between gap-3'>
           <span>Kelengkapan Profil</span>
-          <span className={ready ? 'text-emerald-600' : 'text-amber-600'}>
+          <span
+            className={`mono text-base font-bold ${
+              ready ? 'text-emerald-600' : 'text-amber-600'
+            }`}
+          >
             {data.score}%
           </span>
         </CardTitle>
@@ -38,20 +60,25 @@ export function CompletenessCard({ data, isLoading }: Props) {
       <CardContent className='space-y-3'>
         <Progress value={data.score} />
         <p className='text-muted-foreground text-xs'>
-          Minimum {data.minRequired}% untuk publish.
+          Minimum {data.minRequired}% untuk publikasi.
         </p>
         {data.missing.length ? (
-          <ul className='space-y-1.5 text-sm'>
-            {data.missing.map((item) => (
-              <li key={item} className='flex items-center gap-2'>
-                <Circle className='text-muted-foreground size-3.5' />
-                <span>{item}</span>
-              </li>
-            ))}
-          </ul>
+          <div className='space-y-1.5'>
+            <p className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>
+              Belum lengkap
+            </p>
+            <ul className='space-y-1.5 text-sm'>
+              {data.missing.map((item) => (
+                <li key={item} className='flex items-center gap-2'>
+                  <Circle className='text-muted-foreground size-3.5 shrink-0' />
+                  <span>{label(item)}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
         ) : (
           <p className='flex items-center gap-2 text-sm text-emerald-700'>
-            <CheckCircle2 className='size-4' /> Lengkap
+            <CheckCircle2 className='size-4' /> Semua kriteria terpenuhi
           </p>
         )}
       </CardContent>
