@@ -50,11 +50,8 @@ async function main() {
       bio: 'I am an experienced Math and Physics tutor.',
       subjects: [Subject.MATH, Subject.PHYSICS],
       hourlyRate: 50,
-      availability: {
-        Monday: ['10:00', '14:00'],
-        Wednesday: ['12:00', '16:00'],
-      },
       experience: 5,
+      whatsappNumber: '+6281234567890',
     },
   });
 

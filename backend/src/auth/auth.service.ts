@@ -98,7 +98,6 @@ export class AuthService {
               bio: '',
               subjects: [],
               experience: 0,
-              availability: [],
               hourlyRate: 0,
               whatsappNumber: whatsappNumber!,
             },

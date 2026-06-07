@@ -14,6 +14,8 @@ import { ReviewsModule } from './reviews/reviews.module';
 import { ApplicationsModule } from './applications/applications.module';
 import { MaterialsModule } from './materials/materials.module';
 import { AdminModule } from './admin/admin.module';
+import { AvailabilityModule } from './availability/availability.module';
+import { SessionsModule } from './sessions/sessions.module';
 
 @Module({
   imports: [
@@ -30,6 +32,8 @@ import { AdminModule } from './admin/admin.module';
     ApplicationsModule,
     MaterialsModule,
     AdminModule,
+    AvailabilityModule,
+    SessionsModule,
   ],
   controllers: [AppController],
   providers: [

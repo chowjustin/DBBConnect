@@ -27,10 +27,6 @@ export class CreateTutorDto {
   subjects: Subject[];
 
   @IsOptional()
-  @IsObject()
-  availability?: Record<string, string[]>;
-
-  @IsOptional()
   @IsString()
   @Matches(WA_REGEX, { message: 'whatsappNumber must be E.164 format' })
   whatsappNumber?: string;

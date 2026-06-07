@@ -105,7 +105,7 @@ Migration note: backfill existing tutor `whatsappNumber` with empty string; bloc
 
 ---
 
-### Commit 4 — [ ] `feat(be): sessions, attendees, availability, booking and drop legacy scheduling`
+### Commit 4 — [x] `feat(be): sessions, attendees, availability, booking and drop legacy scheduling`
 **Schema:**
 ```prisma
 enum SessionStatus { SCHEDULED COMPLETED CANCELED NO_SHOW }

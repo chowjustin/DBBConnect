@@ -55,6 +55,24 @@ enum VerificationStatus {
   REJECTED
 }
 
+enum SessionStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELED
+  NO_SHOW
+}
+
+enum ClassFormat {
+  PRIVATE_1
+  SEMI_PRIVATE
+  GROUP
+}
+
+enum ClassMode {
+  ONLINE
+  OFFLINE
+}
+
 
 model User {
   id              String           @id @default(cuid())
@@ -107,7 +125,6 @@ model TutorProfile {
   bio                String?
   subjects           Subject[]
   experience         Int?
-  availability       Json?
   hourlyRate         Float?
   profileImage       String?
   whatsappNumber     String           @default("")
@@ -133,6 +150,9 @@ model TutorProfile {
   uploads       FileUpload[]
   materials     Material[]
   students      StudentProfile[] @relation("TutorStudents")
+  sessions          Session[]
+  availabilitySlots AvailabilitySlot[]
+  blackoutDates     BlackoutDate[]
 }
 
 model StudentProfile {
@@ -153,6 +173,7 @@ model StudentProfile {
   applications  Application[]   @relation("StudentApplications")
 
   materialAccesses MaterialAccess[]
+  sessionAttendees SessionAttendee[]
 }
 
 
@@ -164,12 +185,12 @@ model Application {
   status        ApplicationStatus @default(PENDING)
   message       String?
   requestedAt   DateTime        @default(now())
-  scheduledAt   DateTime?
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
   student       StudentProfile   @relation("StudentApplications", fields: [studentId], references: [id], onDelete: Cascade)
   tutor         TutorProfile     @relation("TutorApplications", fields: [tutorId], references: [id], onDelete: Cascade)
+  sessions      Session[]
 
   @@unique([studentId, tutorId])
 }
@@ -231,4 +252,65 @@ model MaterialAccess {
   student    StudentProfile  @relation(fields: [studentId], references: [id], onDelete: Cascade)
 
   @@unique([materialId, studentId])
+}
+
+model Session {
+  id             String        @id @default(cuid())
+  applicationId  String?
+  tutorId        String
+  startsAt       DateTime
+  endsAt         DateTime
+  status         SessionStatus @default(SCHEDULED)
+  format         ClassFormat   @default(PRIVATE_1)
+  mode           ClassMode     @default(ONLINE)
+  pricePerSeat   Int
+  meetingUrl     String?
+  location       String?
+  notes          String?
+  reminderSentAt DateTime?
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  application    Application?  @relation(fields: [applicationId], references: [id], onDelete: SetNull)
+  tutor          TutorProfile  @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  attendees      SessionAttendee[]
+
+  @@index([tutorId, startsAt])
+}
+
+model SessionAttendee {
+  id        String   @id @default(cuid())
+  sessionId String
+  studentId String
+  attended  Boolean  @default(false)
+  paymentId String?  @unique
+
+  session   Session        @relation(fields: [sessionId], references: [id], onDelete: Cascade)
+  student   StudentProfile @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId, studentId])
+  @@index([studentId])
+}
+
+model AvailabilitySlot {
+  id        String @id @default(cuid())
+  tutorId   String
+  dayOfWeek Int
+  startMin  Int
+  endMin    Int
+  timezone  String
+
+  tutor     TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  @@index([tutorId, dayOfWeek])
+}
+
+model BlackoutDate {
+  id       String   @id @default(cuid())
+  tutorId  String
+  startsAt DateTime
+  endsAt   DateTime
+  reason   String?
+
+  tutor    TutorProfile @relation(fields: [tutorId], references: [id], onDelete: Cascade)
+  @@index([tutorId, startsAt])
 }

@@ -84,7 +84,10 @@ export class TutorsService {
       throw new NotFoundException('Tutor profile not found');
     }
     // availability count via legacy json or future AvailabilitySlot
-    const hasAvailability = !!tutorUser.tutorProfile.availability;
+    const slotCount = await this.prisma.availabilitySlot.count({
+      where: { tutorId: tutorUser.tutorProfile.id },
+    });
+    const hasAvailability = slotCount > 0;
     const { score, missing } = this.computeCompleteness(
       tutorUser.tutorProfile,
       hasAvailability,
@@ -103,7 +106,10 @@ export class TutorsService {
     if (tutorUser.tutorProfile.verificationStatus !== VerificationStatus.VERIFIED) {
       throw new ForbiddenException('Verify your account before publishing');
     }
-    const hasAvailability = !!tutorUser.tutorProfile.availability;
+    const slotCount = await this.prisma.availabilitySlot.count({
+      where: { tutorId: tutorUser.tutorProfile.id },
+    });
+    const hasAvailability = slotCount > 0;
     const { score, missing } = this.computeCompleteness(
       tutorUser.tutorProfile,
       hasAvailability,
@@ -268,7 +274,6 @@ export class TutorsService {
       data: {
         bio: dto.bio,
         hourlyRate: dto.hourlyRate,
-        availability: dto.availability,
         subjects: dto.subjects,
         whatsappNumber: dto.whatsappNumber,
         educationBackground: dto.educationBackground,
@@ -357,7 +362,6 @@ export class TutorsService {
       role: app.student.user.role,
       applicationStatus: app.status,
       requestedAt: app.requestedAt,
-      scheduledAt: app.scheduledAt,
     }));
   }
 }
