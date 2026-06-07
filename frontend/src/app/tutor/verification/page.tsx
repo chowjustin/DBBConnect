@@ -76,7 +76,7 @@ export default function TutorVerificationPage() {
       {profileQ.isLoading || !profile ? (
         <Skeleton className='h-32 w-full' />
       ) : (
-        <Card className='hover:shadow-md hover:shadow-primary-500/5 transition-shadow'>
+        <Card className='hover:shadow-primary-500/5 transition-shadow hover:shadow-md'>
           <CardHeader>
             <CardTitle className='flex items-center gap-3'>
               Status
@@ -106,9 +106,7 @@ export default function TutorVerificationPage() {
                 <DocSlot
                   label='Dokumen Identitas (KTP)'
                   doc={idDoc}
-                  onPick={(f) =>
-                    uploadDoc.mutate(f, { onSuccess: setIdDoc })
-                  }
+                  onPick={(f) => uploadDoc.mutate(f, { onSuccess: setIdDoc })}
                   onClear={() => setIdDoc(null)}
                   onPreview={(url) => setLightbox(url)}
                   uploading={uploadDoc.isPending}
@@ -116,9 +114,7 @@ export default function TutorVerificationPage() {
                 <DocSlot
                   label='Bukti Pendidikan (Ijazah)'
                   doc={eduDoc}
-                  onPick={(f) =>
-                    uploadDoc.mutate(f, { onSuccess: setEduDoc })
-                  }
+                  onPick={(f) => uploadDoc.mutate(f, { onSuccess: setEduDoc })}
                   onClear={() => setEduDoc(null)}
                   onPreview={(url) => setLightbox(url)}
                   uploading={uploadDoc.isPending}
@@ -127,7 +123,9 @@ export default function TutorVerificationPage() {
             )}
 
             {profile.verificationStatus !== 'VERIFIED' &&
-            !(profile.verificationStatus === 'PENDING' && profile.idDocumentUrl) ? (
+            !(
+              profile.verificationStatus === 'PENDING' && profile.idDocumentUrl
+            ) ? (
               <Button
                 onClick={() => submit.mutate()}
                 disabled={!idDoc || !eduDoc || submit.isPending}
@@ -139,7 +137,9 @@ export default function TutorVerificationPage() {
             {profile.verificationStatus === 'REJECTED' ? (
               <Button
                 variant='outline'
-                onClick={() => qc.invalidateQueries({ queryKey: ['/tutors/profile'] })}
+                onClick={() =>
+                  qc.invalidateQueries({ queryKey: ['/tutors/profile'] })
+                }
               >
                 Ajukan Ulang
               </Button>
@@ -191,7 +191,12 @@ function DocSlot({
           <div className='min-w-0 flex-1 truncate text-xs'>
             {doc.path.split('/').pop()}
           </div>
-          <Button variant='ghost' size='icon-sm' onClick={onClear}>
+          <Button
+            variant='ghost'
+            size='icon-sm'
+            aria-label='Hapus dokumen'
+            onClick={onClear}
+          >
             ✕
           </Button>
         </div>

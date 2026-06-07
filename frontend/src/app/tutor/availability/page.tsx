@@ -105,9 +105,7 @@ export default function AvailabilityPage() {
                 <Label>Hari</Label>
                 <Select
                   value={String(slot.dayOfWeek)}
-                  onValueChange={(v) =>
-                    updateSlot(i, { dayOfWeek: Number(v) })
-                  }
+                  onValueChange={(v) => updateSlot(i, { dayOfWeek: Number(v) })}
                 >
                   <SelectTrigger>
                     <SelectValue />
@@ -149,6 +147,7 @@ export default function AvailabilityPage() {
                 type='button'
                 variant='ghost'
                 size='icon'
+                aria-label='Hapus slot'
                 onClick={() => removeSlot(i)}
               >
                 <Trash2 className='size-4' />

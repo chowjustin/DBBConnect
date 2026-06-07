@@ -31,8 +31,19 @@
   /* #1e1b4b */
   /* #endregion =========== Primary Color =========== */
 
-  /* Dark surface accent */
-  --color-dark: #222222;
+  /* #region /** =========== Secondary Color (teal) =========== */
+  --color-secondary-50: oklch(0.974 0.014 195);
+  --color-secondary-100: oklch(0.94 0.04 192);
+  --color-secondary-200: oklch(0.88 0.075 190);
+  --color-secondary-300: oklch(0.81 0.105 188);
+  --color-secondary-400: oklch(0.74 0.125 186);
+  --color-secondary-500: oklch(0.66 0.135 185);
+  --color-secondary-600: oklch(0.575 0.135 185);
+  --color-secondary-700: oklch(0.485 0.115 185);
+  --color-secondary-800: oklch(0.415 0.095 185);
+  --color-secondary-900: oklch(0.36 0.075 185);
+  --color-secondary-950: oklch(0.26 0.055 188);
+  /* #endregion =========== Secondary Color =========== */
 
   /* Animation tokens */
   --animate-flicker: flicker 3s linear infinite;
@@ -90,22 +101,22 @@
 
   /* #region =========== Typography =========== */
   .h0 {
-    @apply font-primary text-3xl font-bold md:text-5xl tracking-tight text-primary-900;
+    @apply font-primary text-primary-900 text-3xl font-bold tracking-tight md:text-5xl;
   }
 
   h1,
   .h1 {
-    @apply font-primary text-2xl font-bold md:text-4xl tracking-tight text-primary-900;
+    @apply font-primary text-primary-900 text-2xl font-bold tracking-tight md:text-4xl;
   }
 
   h2,
   .h2 {
-    @apply font-primary text-xl font-bold md:text-3xl tracking-tight text-primary-900;
+    @apply font-primary text-primary-900 text-xl font-bold tracking-tight md:text-3xl;
   }
 
   h3,
   .h3 {
-    @apply font-primary text-lg font-bold md:text-2xl tracking-tight text-primary-900;
+    @apply font-primary text-primary-900 text-lg font-bold tracking-tight md:text-2xl;
   }
 
   h4,
@@ -115,20 +126,22 @@
 
   body,
   .p {
-    @apply font-primary text-base md:text-lg leading-relaxed;
+    @apply font-primary text-base leading-relaxed md:text-lg;
   }
 
   /* Tabular numbers + mono for stats, money, IDs */
   .mono {
     font-family:
-      var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco,
-      Consolas, monospace;
-    font-feature-settings: 'tnum' 1, 'zero' 1;
+      var(--font-mono), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+      monospace;
+    font-feature-settings:
+      'tnum' 1,
+      'zero' 1;
   }
 
   /* Glass surface utility — frosted card */
   .glass {
-    @apply backdrop-blur-xl bg-white/75 border border-white/60 shadow-xl shadow-primary-500/5;
+    @apply shadow-primary-500/5 border border-white/60 bg-white/75 shadow-xl backdrop-blur-xl;
   }
   /* #endregion =========== Typography =========== */
 
@@ -173,12 +186,24 @@
   .stagger-children > * {
     animation: page-in 0.35s ease-out both;
   }
-  .stagger-children > *:nth-child(1) { animation-delay: 0ms; }
-  .stagger-children > *:nth-child(2) { animation-delay: 60ms; }
-  .stagger-children > *:nth-child(3) { animation-delay: 120ms; }
-  .stagger-children > *:nth-child(4) { animation-delay: 180ms; }
-  .stagger-children > *:nth-child(5) { animation-delay: 240ms; }
-  .stagger-children > *:nth-child(6) { animation-delay: 300ms; }
+  .stagger-children > *:nth-child(1) {
+    animation-delay: 0ms;
+  }
+  .stagger-children > *:nth-child(2) {
+    animation-delay: 60ms;
+  }
+  .stagger-children > *:nth-child(3) {
+    animation-delay: 120ms;
+  }
+  .stagger-children > *:nth-child(4) {
+    animation-delay: 180ms;
+  }
+  .stagger-children > *:nth-child(5) {
+    animation-delay: 240ms;
+  }
+  .stagger-children > *:nth-child(6) {
+    animation-delay: 300ms;
+  }
 
   :root {
     --background: 0 0% 100%;
@@ -189,8 +214,8 @@
     --popover-foreground: 0 0% 3.9%;
     --primary: 240 60% 55%;
     --primary-foreground: 0 0% 98%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
+    --secondary: 185 70% 41%;
+    --secondary-foreground: 0 0% 100%;
     --muted: 0 0% 96.1%;
     --muted-foreground: 0 0% 45.1%;
     --accent: 0 0% 96.1%;
@@ -303,4 +328,3 @@
     @apply bg-background text-foreground;
   }
 }
-

@@ -106,7 +106,7 @@ export function PaymentCheckoutModal({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className='sm:max-w-lg max-h-[90vh] overflow-y-auto'>
+      <DialogContent className='max-h-[90vh] overflow-y-auto sm:max-w-lg'>
         <DialogHeader>
           <DialogTitle className='flex items-center gap-2'>
             <Banknote className='text-primary size-5' />
@@ -119,12 +119,12 @@ export function PaymentCheckoutModal({
 
         <div className='space-y-4'>
           {typeof amount === 'number' ? (
-            <Card className='from-primary-50 to-primary-100 bg-gradient-to-br border-primary-200'>
+            <Card className='from-primary-50 to-primary-100 border-primary-200 bg-gradient-to-br'>
               <CardContent className='py-4'>
-                <div className='text-muted-foreground text-xs uppercase tracking-wide font-semibold'>
+                <div className='text-muted-foreground text-xs font-semibold tracking-wide uppercase'>
                   Total Pembayaran
                 </div>
-                <div className='mono text-2xl font-bold text-primary-900'>
+                <div className='mono text-primary-900 text-2xl font-bold'>
                   {formatRupiah(amount)}
                 </div>
               </CardContent>
@@ -132,7 +132,7 @@ export function PaymentCheckoutModal({
           ) : null}
 
           <div>
-            <div className='text-sm font-semibold mb-2'>
+            <div className='mb-2 text-sm font-semibold'>
               Transfer ke salah satu rekening berikut
             </div>
             {banksQ.isLoading ? (
@@ -151,6 +151,7 @@ export function PaymentCheckoutModal({
                         type='button'
                         variant='ghost'
                         size='icon-xs'
+                        aria-label='Salin nomor rekening'
                         onClick={() => copy(b.accountNumber)}
                       >
                         <Copy className='size-3' />
@@ -160,7 +161,7 @@ export function PaymentCheckoutModal({
                       a.n. {b.accountHolder}
                     </div>
                     {b.notes ? (
-                      <div className='text-muted-foreground text-xs mt-1'>
+                      <div className='text-muted-foreground mt-1 text-xs'>
                         {b.notes}
                       </div>
                     ) : null}

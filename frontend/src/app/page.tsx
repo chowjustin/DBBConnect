@@ -26,7 +26,7 @@ import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 
 export default function LandingPage() {
   return (
-    <div className='flex min-h-screen flex-col bg-white text-foreground'>
+    <div className='text-foreground flex min-h-screen flex-col bg-white'>
       <Header />
       <Hero />
       <Stats />
@@ -42,7 +42,7 @@ export default function LandingPage() {
 
 function Header() {
   return (
-    <header className='sticky top-0 z-10 border-b border-primary-100/60 bg-white/70 backdrop-blur-xl'>
+    <header className='border-primary-100/60 sticky top-0 z-10 border-b bg-white/70 backdrop-blur-xl'>
       <div className='layout flex items-center justify-between py-4'>
         <Link
           href='/'
@@ -73,9 +73,9 @@ function Hero() {
     <section className='relative overflow-hidden py-20 sm:py-28'>
       {/* Gradient mesh background */}
       <div className='pointer-events-none absolute inset-0 -z-10'>
-        <div className='absolute -top-32 -left-32 size-96 rounded-full bg-primary-200/40 blur-3xl' />
-        <div className='absolute -top-40 right-0 size-96 rounded-full bg-primary-400/30 blur-3xl' />
-        <div className='absolute bottom-0 left-1/3 size-96 rounded-full bg-primary-300/30 blur-3xl' />
+        <div className='bg-primary-200/40 absolute -top-32 -left-32 size-96 rounded-full blur-3xl' />
+        <div className='bg-primary-400/30 absolute -top-40 right-0 size-96 rounded-full blur-3xl' />
+        <div className='bg-primary-300/30 absolute bottom-0 left-1/3 size-96 rounded-full blur-3xl' />
       </div>
       <div className='layout grid items-center gap-12 lg:grid-cols-2'>
         <div className='space-y-6'>
@@ -94,7 +94,10 @@ function Hero() {
           </p>
           <div className='flex flex-wrap gap-3'>
             <Link href='/auth/register/student'>
-              <Button size='lg' className='group gap-2 px-6 shadow-lg shadow-primary-500/20'>
+              <Button
+                size='lg'
+                className='group shadow-primary-500/20 gap-2 px-6 shadow-lg'
+              >
                 Cari Tutor
                 <ArrowRight className='size-4 transition-transform group-hover:translate-x-0.5' />
               </Button>
@@ -111,27 +114,27 @@ function Hero() {
         <div className='relative hidden lg:block'>
           <div className='glass mx-auto max-w-sm rounded-2xl p-6'>
             <div className='flex items-start gap-3'>
-              <Avatar className='size-12 ring-2 ring-primary-100'>
-                <AvatarFallback className='bg-gradient-to-br from-primary-400 to-primary-600 text-white font-bold'>
-                  AT
+              <Avatar className='ring-primary-100 size-12 ring-2'>
+                <AvatarFallback className='from-primary-400 to-primary-600 bg-gradient-to-br font-bold text-white'>
+                  DB
                 </AvatarFallback>
               </Avatar>
               <div className='flex-1'>
-                <div className='font-semibold'>Alice Tutor</div>
-                <div className='flex items-center gap-1 text-xs text-muted-foreground'>
+                <div className='font-semibold'>Tutor Terverifikasi</div>
+                <div className='text-muted-foreground flex items-center gap-1 text-xs'>
                   <Star className='size-3 fill-amber-400 text-amber-400' />
-                  4.9 (124 ulasan)
+                  4.9 · Banyak ulasan
                 </div>
               </div>
               <div className='text-right'>
-                <div className='mono text-sm font-bold text-primary-900'>
-                  Rp 100.000
+                <div className='mono text-primary-900 text-sm font-bold'>
+                  Mulai
                 </div>
-                <div className='text-muted-foreground text-[10px]'>/jam</div>
+                <div className='text-muted-foreground text-[10px]'>per jam</div>
               </div>
             </div>
             <p className='text-muted-foreground mt-3 text-sm'>
-              Pengajar matematika dan fisika SMA dengan pengalaman 5 tahun.
+              Belajar dengan tutor profesional, fleksibel, dan terjadwal.
             </p>
             <div className='mt-3 flex flex-wrap gap-1.5'>
               <span className='bg-primary-50 text-primary-700 border-primary-100 rounded-full border px-2 py-0.5 text-[10px] font-medium'>
@@ -140,7 +143,7 @@ function Hero() {
               <span className='bg-primary-50 text-primary-700 border-primary-100 rounded-full border px-2 py-0.5 text-[10px] font-medium'>
                 Fisika
               </span>
-              <span className='border-emerald-200 bg-emerald-50 text-emerald-700 rounded-full border px-2 py-0.5 text-[10px] font-medium'>
+              <span className='border-secondary-200 bg-secondary-50 text-secondary-800 rounded-full border px-2 py-0.5 text-[10px] font-medium'>
                 Verified
               </span>
             </div>
@@ -179,7 +182,7 @@ function AnimatedCounter({ target }: { target: number }) {
 
 function Stats() {
   return (
-    <section className='bg-primary-50/40 border-y border-primary-100/60 py-12'>
+    <section className='bg-primary-50/40 border-primary-100/60 border-y py-12'>
       <div className='layout grid grid-cols-2 gap-6 md:grid-cols-4'>
         {[
           { n: 1200, label: 'Tutor Terverifikasi' },
@@ -188,10 +191,10 @@ function Stats() {
           { n: 30, label: 'Kota Terjangkau' },
         ].map((s) => (
           <div key={s.label} className='text-center'>
-            <div className='mono text-3xl font-bold text-primary-900 md:text-4xl'>
+            <div className='mono text-primary-900 text-3xl font-bold md:text-4xl'>
               <AnimatedCounter target={s.n} />+
             </div>
-            <div className='text-muted-foreground mt-1 text-xs uppercase tracking-wide font-semibold'>
+            <div className='text-muted-foreground mt-1 text-xs font-semibold tracking-wide uppercase'>
               {s.label}
             </div>
           </div>
@@ -238,7 +241,7 @@ function Features() {
           {FEATURES.map((f) => (
             <Card
               key={f.title}
-              className='from-primary-50/40 to-white bg-gradient-to-b hover:-translate-y-1 hover:shadow-lg hover:shadow-primary-500/10 transition-all'
+              className='from-primary-50/40 hover:shadow-primary-500/10 bg-gradient-to-b to-white transition-all hover:-translate-y-1 hover:shadow-lg'
             >
               <CardContent className='space-y-3 pt-6'>
                 <div className='bg-primary-100 text-primary-700 ring-primary-200/60 inline-flex rounded-lg p-2 ring-1'>
@@ -288,7 +291,7 @@ function HowItWorks() {
               className='space-y-3 text-center'
               style={{ animationDelay: `${i * 100}ms` }}
             >
-              <div className='from-primary-500 to-primary-700 mx-auto flex size-14 items-center justify-center rounded-full bg-gradient-to-br text-2xl font-bold text-white shadow-lg shadow-primary-500/30'>
+              <div className='from-primary-500 to-primary-700 shadow-primary-500/30 mx-auto flex size-14 items-center justify-center rounded-full bg-gradient-to-br text-2xl font-bold text-white shadow-lg'>
                 {s.n}
               </div>
               <h3 className='h4'>{s.title}</h3>
@@ -313,11 +316,11 @@ function Pricing() {
         </div>
         <div className='mx-auto grid max-w-4xl gap-5 sm:grid-cols-2'>
           {/* Premium Siswa */}
-          <Card className='hover:shadow-md hover:shadow-primary-500/5 transition-all'>
+          <Card className='hover:shadow-primary-500/5 transition-all hover:shadow-md'>
             <CardContent className='space-y-4 pt-6'>
               <div>
                 <h3 className='h3'>Premium Siswa</h3>
-                <div className='mono mt-2 text-3xl font-bold text-primary-900'>
+                <div className='mono text-primary-900 mt-2 text-3xl font-bold'>
                   Rp 50.000
                   <span className='text-muted-foreground ml-1 text-sm font-normal'>
                     /bln
@@ -332,7 +335,7 @@ function Pricing() {
                   'Diskon 10% untuk sesi pertama',
                 ].map((p) => (
                   <li key={p} className='flex items-start gap-2'>
-                    <CheckCircle2 className='text-emerald-600 mt-0.5 size-4 shrink-0' />
+                    <CheckCircle2 className='mt-0.5 size-4 shrink-0 text-emerald-600' />
                     {p}
                   </li>
                 ))}
@@ -346,17 +349,17 @@ function Pricing() {
           </Card>
 
           {/* Pro Tutor — highlighted */}
-          <Card className='border-primary-300 ring-2 ring-primary-100 relative overflow-hidden'>
-            <div className='from-primary-600 to-primary-400 bg-gradient-to-r px-4 py-1 text-center text-xs font-bold uppercase tracking-wider text-white'>
+          <Card className='border-primary-300 ring-primary-100 relative overflow-hidden ring-2'>
+            <div className='from-primary-600 to-primary-400 bg-gradient-to-r px-4 py-1 text-center text-xs font-bold tracking-wider text-white uppercase'>
               Paling Populer
             </div>
             <CardContent className='space-y-4 pt-6'>
               <div>
                 <h3 className='h3 flex items-center gap-2'>
                   Pro Tutor
-                  <Sparkles className='text-amber-500 size-5' />
+                  <Sparkles className='size-5 text-amber-500' />
                 </h3>
-                <div className='mono mt-2 text-3xl font-bold text-primary-900'>
+                <div className='mono text-primary-900 mt-2 text-3xl font-bold'>
                   Rp 100.000
                   <span className='text-muted-foreground ml-1 text-sm font-normal'>
                     /bln
@@ -371,7 +374,7 @@ function Pricing() {
                   'Boost prioritas pencarian',
                 ].map((p) => (
                   <li key={p} className='flex items-start gap-2'>
-                    <CheckCircle2 className='text-emerald-600 mt-0.5 size-4 shrink-0' />
+                    <CheckCircle2 className='mt-0.5 size-4 shrink-0 text-emerald-600' />
                     {p}
                   </li>
                 ))}
@@ -419,7 +422,7 @@ function Testimonials() {
         </div>
         <div className='grid gap-5 md:grid-cols-3'>
           {TESTIMONIALS.map((t) => (
-            <Card key={t.name} className='hover:shadow-md transition-shadow'>
+            <Card key={t.name} className='transition-shadow hover:shadow-md'>
               <CardContent className='space-y-4 pt-6'>
                 <div className='flex gap-0.5 text-amber-400'>
                   {Array.from({ length: 5 }).map((_, i) => (
@@ -429,13 +432,18 @@ function Testimonials() {
                 <p className='text-sm'>“{t.quote}”</p>
                 <div className='flex items-center gap-3'>
                   <Avatar className='size-9'>
-                    <AvatarFallback className='bg-gradient-to-br from-primary-400 to-primary-600 text-xs font-bold text-white'>
-                      {t.name.split(' ').map((p) => p[0]).join('')}
+                    <AvatarFallback className='from-primary-400 to-primary-600 bg-gradient-to-br text-xs font-bold text-white'>
+                      {t.name
+                        .split(' ')
+                        .map((p) => p[0])
+                        .join('')}
                     </AvatarFallback>
                   </Avatar>
                   <div>
                     <div className='text-sm font-semibold'>{t.name}</div>
-                    <div className='text-muted-foreground text-xs'>{t.role}</div>
+                    <div className='text-muted-foreground text-xs'>
+                      {t.role}
+                    </div>
                   </div>
                 </div>
               </CardContent>
@@ -494,7 +502,7 @@ function FAQ() {
 
 function Footer() {
   return (
-    <footer className='border-t border-primary-100 bg-white py-12'>
+    <footer className='border-primary-100 border-t bg-white py-12'>
       <div className='layout grid gap-8 md:grid-cols-4'>
         <div className='space-y-3'>
           <Link
@@ -509,7 +517,7 @@ function Footer() {
           </p>
         </div>
         <div>
-          <div className='text-sm font-semibold mb-2'>Produk</div>
+          <div className='mb-2 text-sm font-semibold'>Produk</div>
           <ul className='text-muted-foreground space-y-1 text-xs'>
             <li>Cari Tutor</li>
             <li>Jadi Tutor</li>
@@ -517,7 +525,7 @@ function Footer() {
           </ul>
         </div>
         <div>
-          <div className='text-sm font-semibold mb-2'>Sumber</div>
+          <div className='mb-2 text-sm font-semibold'>Sumber</div>
           <ul className='text-muted-foreground space-y-1 text-xs'>
             <li>Pusat Bantuan</li>
             <li>Blog</li>
@@ -525,7 +533,7 @@ function Footer() {
           </ul>
         </div>
         <div>
-          <div className='text-sm font-semibold mb-2'>Legal</div>
+          <div className='mb-2 text-sm font-semibold'>Legal</div>
           <ul className='text-muted-foreground space-y-1 text-xs'>
             <li>
               <Link href='/legal/terms'>Syarat Layanan</Link>
@@ -536,7 +544,7 @@ function Footer() {
           </ul>
         </div>
       </div>
-      <div className='layout text-muted-foreground border-t border-primary-100 pt-6 mt-8 text-center text-xs'>
+      <div className='layout text-muted-foreground border-primary-100 mt-8 border-t pt-6 text-center text-xs'>
         © {new Date().getFullYear()} DBBConnect. All rights reserved.
       </div>
     </footer>

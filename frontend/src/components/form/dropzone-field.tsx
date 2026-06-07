@@ -125,6 +125,7 @@ export function DropzoneField<T extends FieldValues>({
                     type='button'
                     variant='ghost'
                     size='icon-sm'
+                    aria-label='Hapus file'
                     onClick={() => field.onChange(null)}
                   >
                     <X className='size-4' />
@@ -170,7 +171,9 @@ export function DropzoneField<T extends FieldValues>({
                 </div>
                 <div className='text-muted-foreground mt-1 text-xs'>
                   Maks {maxSizeMB} MB
-                  {accept ? ` · ${accept.replace(/\./g, '').toUpperCase()}` : ''}
+                  {accept
+                    ? ` · ${accept.replace(/\./g, '').toUpperCase()}`
+                    : ''}
                 </div>
               </div>
               <input

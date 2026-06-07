@@ -9,12 +9,7 @@ import useAuthStore from '@/store/use-auth-store';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
   Table,
   TableBody,
@@ -106,7 +101,7 @@ export default function TutorMaterialsPage() {
         description='Unggah materi ajar yang dapat diakses siswa Anda.'
       />
 
-      <Card className='hover:shadow-md hover:shadow-primary-500/5 transition-shadow'>
+      <Card className='hover:shadow-primary-500/5 transition-shadow hover:shadow-md'>
         <CardHeader>
           <CardTitle>Unggah Materi</CardTitle>
         </CardHeader>
@@ -126,6 +121,7 @@ export default function TutorMaterialsPage() {
                 type='button'
                 variant='ghost'
                 size='icon-sm'
+                aria-label='Hapus file'
                 onClick={() => setFile(null)}
               >
                 <X className='size-4' />
