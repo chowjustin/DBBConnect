@@ -322,6 +322,16 @@ export class AuthService {
     }
   }
 
+  async adminMarkVerified(userId: string) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new BadRequestException('User not found');
+    return this.prisma.user.update({
+      where: { id: userId },
+      data: { emailVerifiedAt: user.emailVerifiedAt ?? new Date() },
+      select: { id: true, email: true, emailVerifiedAt: true },
+    });
+  }
+
   async createAdmin(input: {
     name: string;
     email: string;

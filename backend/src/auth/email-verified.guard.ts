@@ -22,6 +22,14 @@ export class EmailVerifiedGuard implements CanActivate {
     );
     if (!required) return true;
 
+    // Dev/staging bypass. Refuses in production regardless of env.
+    if (
+      process.env.NODE_ENV !== 'production' &&
+      process.env.DEV_BYPASS_EMAIL_VERIFICATION === 'true'
+    ) {
+      return true;
+    }
+
     const req = ctx.switchToHttp().getRequest();
     if (!req.user?.sub) throw new ForbiddenException('Not authenticated');
 

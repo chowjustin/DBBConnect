@@ -1,4 +1,4 @@
-import { Body, Controller, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Param, Post, UseGuards } from '@nestjs/common';
 import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -15,5 +15,11 @@ export class AdminUsersController {
   @Post('invite')
   invite(@Body() dto: InviteAdminDto) {
     return this.authService.createAdmin(dto);
+  }
+
+  @Roles(UserRole.ADMIN)
+  @Post(':id/verify-email')
+  markVerified(@Param('id') id: string) {
+    return this.authService.adminMarkVerified(id);
   }
 }
