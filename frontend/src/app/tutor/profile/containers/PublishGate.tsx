@@ -58,7 +58,7 @@ export function PublishGate({ profile, completeness }: Props) {
       <div className='pt-1'>
         {isPublished ? (
           <Button
-            variant='destructive'
+            variant='outline'
             size='sm'
             className='w-full'
             onClick={() => unpublish.mutate()}
