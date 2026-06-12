@@ -13,27 +13,12 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { Dropzone } from '@/components/form/dropzone-field';
 import { notifyAxiosError, notifySuccess } from '@/lib/toast';
-import { resolveFileUrl } from '@/lib/file-url';
+import { uploadFile, type UploadResult } from '@/lib/upload';
 import { useTutorProfile } from '@/app/tutor/profile/hooks/query';
-
-interface UploadResponse {
-  file_url: string;
-  path: string;
-  kind: string;
-}
 
 function useUploadDoc() {
   return useMutation({
-    mutationFn: async (file: File) => {
-      const fd = new FormData();
-      fd.append('verification-doc', file);
-      const res = await api.post<UploadResponse>(
-        '/upload/verification-doc',
-        fd,
-        { headers: { 'Content-Type': 'multipart/form-data' } },
-      );
-      return res.data;
-    },
+    mutationFn: (file: File) => uploadFile(file, 'verification'),
     onError: (e) => notifyAxiosError(e, 'Gagal mengunggah dokumen'),
   });
 }
@@ -42,16 +27,16 @@ export default function TutorVerificationPage() {
   const qc = useQueryClient();
   const profileQ = useTutorProfile();
   const uploadDoc = useUploadDoc();
-  const [idDoc, setIdDoc] = React.useState<UploadResponse | null>(null);
-  const [eduDoc, setEduDoc] = React.useState<UploadResponse | null>(null);
+  const [idDoc, setIdDoc] = React.useState<UploadResult | null>(null);
+  const [eduDoc, setEduDoc] = React.useState<UploadResult | null>(null);
   const [lightbox, setLightbox] = React.useState<string | null>(null);
 
   const submit = useMutation({
     mutationFn: async () => {
       if (!idDoc || !eduDoc) throw new Error('Unggah kedua dokumen');
       const res = await api.post('/tutors/verification', {
-        idDocumentUrl: idDoc.path,
-        educationProofUrl: eduDoc.path,
+        idDocumentUrl: idDoc.file_url,
+        educationProofUrl: eduDoc.file_url,
       });
       return res.data;
     },
@@ -167,7 +152,7 @@ function DocSlot({
   uploading,
 }: {
   label: string;
-  doc: UploadResponse | null;
+  doc: UploadResult | null;
   onPick: (f: File) => void;
   onClear: () => void;
   onPreview: (url: string) => void;
@@ -180,11 +165,11 @@ function DocSlot({
         <div className='border-primary-200 bg-primary-50/30 flex items-center gap-3 rounded-lg border p-3'>
           <button
             type='button'
-            onClick={() => onPreview(resolveFileUrl(doc.path))}
+            onClick={() => onPreview(doc.file_url)}
             className='border-primary-200 size-14 shrink-0 overflow-hidden rounded-md border bg-white'
           >
             <img
-              src={resolveFileUrl(doc.path)}
+              src={doc.file_url}
               alt={label}
               className='size-full object-cover'
             />

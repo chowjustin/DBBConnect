@@ -10,3 +10,9 @@ export class RejectPayoutDto {
   @IsString()
   reason: string;
 }
+
+export class MarkPaidPayoutDto {
+  /** Absolute file_url returned by POST /upload/file?kind=payout. */
+  @IsString()
+  proofUrl: string;
+}

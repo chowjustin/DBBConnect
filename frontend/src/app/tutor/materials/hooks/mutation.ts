@@ -3,6 +3,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 
 import api from '@/lib/api';
+import { uploadFile } from '@/lib/upload';
 import { notifyAxiosError, notifySuccess } from '@/lib/toast';
 
 export function useUploadMaterial() {
@@ -16,18 +17,15 @@ export function useUploadMaterial() {
       description?: string;
       allowedStudents?: string[];
     }) => {
-      const fd = new FormData();
-      fd.append('file', values.file);
-      if (values.subject) fd.append('subject', values.subject);
-      if (values.level) fd.append('level', values.level);
-      if (values.kind) fd.append('kind', values.kind);
-      if (values.description) fd.append('description', values.description);
-      if (values.allowedStudents) {
-        for (const id of values.allowedStudents)
-          fd.append('allowedStudents', id);
-      }
-      const res = await api.post('/materials/upload', fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const uploaded = await uploadFile(values.file, 'material');
+      const res = await api.post('/materials', {
+        fileUrl: uploaded.file_url,
+        originalName: values.file.name,
+        subject: values.subject,
+        level: values.level,
+        kind: values.kind,
+        description: values.description,
+        allowedStudents: values.allowedStudents,
       });
       return res.data;
     },

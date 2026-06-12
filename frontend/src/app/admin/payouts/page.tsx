@@ -5,6 +5,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { PiggyBank } from 'lucide-react';
 
 import api from '@/lib/api';
+import { uploadFile } from '@/lib/upload';
 import { Button } from '@/components/ui/button';
 import {
   Table,
@@ -66,10 +67,9 @@ export default function AdminPayoutsPage() {
 
   const markPaid = useMutation({
     mutationFn: async ({ id, file }: { id: string; file: File }) => {
-      const fd = new FormData();
-      fd.append('proofImage', file);
-      const res = await api.post(`/admin/payouts/${id}/mark-paid`, fd, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+      const uploaded = await uploadFile(file, 'payout');
+      const res = await api.post(`/admin/payouts/${id}/mark-paid`, {
+        proofUrl: uploaded.file_url,
       });
       return res.data;
     },

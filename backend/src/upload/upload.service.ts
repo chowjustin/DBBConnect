@@ -9,12 +9,19 @@ import { PrismaService } from '../prisma/prisma.service';
 import { S3Service } from '../s3/s3.service';
 import { objectKey } from './multer.config';
 
-export type UploadKind = 'profile' | 'material' | 'verification';
+export type UploadKind =
+  | 'profile'
+  | 'material'
+  | 'verification'
+  | 'payment'
+  | 'payout';
 
 const KIND_TO_FOLDER: Record<UploadKind, string> = {
   profile: 'profile',
   material: 'materials',
   verification: 'verification',
+  payment: 'payments',
+  payout: 'payouts',
 };
 
 @Injectable()

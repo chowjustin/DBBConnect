@@ -5,17 +5,12 @@ import {
 } from '@nestjs/common';
 import { EducationLevel, MaterialKind, Subject } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { S3Service } from '../s3/s3.service';
-import { objectKey } from '../upload/multer.config';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { paginatePrisma } from '../common/paginate';
 
 @Injectable()
 export class MaterialsService {
-  constructor(
-    private prisma: PrismaService,
-    private s3: S3Service,
-  ) {}
+  constructor(private prisma: PrismaService) {}
 
   async userOwnsTutorProfile(userId: string, tutorProfileId: string) {
     const tp = await this.prisma.tutorProfile.findUnique({
@@ -33,8 +28,9 @@ export class MaterialsService {
     return !!sp && sp.userId === userId;
   }
 
-  async uploadMaterial(
-    file: Express.Multer.File,
+  async createMaterial(
+    fileUrl: string,
+    originalName: string,
     tutorUserId: string,
     studentProfileIds: string[],
     meta?: {
@@ -44,7 +40,8 @@ export class MaterialsService {
       description?: string;
     },
   ) {
-    if (!file) throw new BadRequestException('File is missing');
+    if (!fileUrl) throw new BadRequestException('fileUrl is required');
+    if (!originalName) throw new BadRequestException('originalName is required');
 
     const tutor = await this.prisma.tutorProfile.findUnique({
       where: { userId: tutorUserId },
@@ -62,13 +59,10 @@ export class MaterialsService {
       }
     }
 
-    const key = objectKey('materials', file.originalname);
-    await this.s3.putObject(key, file.buffer, file.mimetype);
-
     const material = await this.prisma.material.create({
       data: {
-        title: file.originalname,
-        fileUrl: key,
+        title: originalName,
+        fileUrl,
         tutorId: tutor.id,
         ...(meta?.subject ? { subject: meta.subject } : {}),
         ...(meta?.level ? { level: meta.level } : {}),

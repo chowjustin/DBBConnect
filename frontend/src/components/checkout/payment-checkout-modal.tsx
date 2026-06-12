@@ -9,6 +9,7 @@ import { Banknote, Check, Copy, X } from 'lucide-react';
 
 import api from '@/lib/api';
 import { withIdempotency } from '@/lib/idempotency';
+import { uploadFile } from '@/lib/upload';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -148,21 +149,19 @@ export function PaymentCheckoutModal({
   const checkout = useMutation({
     mutationFn: async (values: CheckoutForm) => {
       if (!values.proof) throw new Error('Pilih bukti pembayaran');
+      const uploaded = await uploadFile(values.proof, 'payment');
       const intent = await createIntent();
-      const fd = new FormData();
-      fd.append('kind', kind);
-      fd.append('refId', intent.refId);
-      fd.append('method', method);
-      if (applied) fd.append('promoCode', applied.code);
-      fd.append('proofImage', values.proof);
-      const idem = withIdempotency();
-      await api.post('/payments/upload-proof', fd, {
-        ...idem,
-        headers: {
-          ...idem.headers,
-          'Content-Type': 'multipart/form-data',
+      await api.post(
+        '/payments/upload-proof',
+        {
+          kind,
+          refId: intent.refId,
+          method,
+          promoCode: applied?.code,
+          proofUrl: uploaded.file_url,
         },
-      });
+        withIdempotency(),
+      );
       return intent;
     },
     onSuccess: () => {

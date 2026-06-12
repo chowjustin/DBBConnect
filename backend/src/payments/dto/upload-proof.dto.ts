@@ -14,6 +14,10 @@ export class UploadProofDto {
   @IsOptional()
   @IsString()
   promoCode?: string;
+
+  /** Absolute file_url returned by POST /upload/file?kind=payment. */
+  @IsString()
+  proofUrl: string;
 }
 
 export class RejectPaymentDto {

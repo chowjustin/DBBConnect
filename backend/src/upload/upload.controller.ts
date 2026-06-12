@@ -4,6 +4,7 @@ import {
   Get,
   Param,
   Post,
+  Query,
   Req,
   StreamableFile,
   UploadedFile,
@@ -22,6 +23,8 @@ import {
   objectKey,
 } from './multer.config';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
+import { s3KeyFromUrl } from './key.util';
+import { UploadFileQueryDto } from './dto/upload-file.query.dto';
 
 @Controller('upload')
 export class UploadController {
@@ -70,6 +73,40 @@ export class UploadController {
     return this.uploadService.buildFileInfo(req, 'verification', key);
   }
 
+  /**
+   * Generic 2-step upload. Client uploads file here, gets back
+   * `{ path }`, then sends `path` in the JSON body of the create/update call
+   * (e.g. POST /materials, POST /payments/upload-proof).
+   */
+  @Post('file')
+  @UseGuards(JwtAuthGuard)
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: multerStorage,
+      fileFilter: materialFileFilter,
+      limits: multerLimits,
+    }),
+  )
+  async uploadFile(
+    @UploadedFile() file: Express.Multer.File,
+    @Query() query: UploadFileQueryDto,
+    @Req() req: Request,
+  ) {
+    if (!file) throw new BadRequestException('No file uploaded');
+    const k = query.kind;
+    const folderKeyPrefix =
+      k === 'material'
+        ? 'materials'
+        : k === 'payment'
+          ? 'payments'
+          : k === 'payout'
+            ? 'payouts'
+            : k;
+    const key = objectKey(folderKeyPrefix, file.originalname);
+    await this.s3.putObject(key, file.buffer, file.mimetype);
+    return this.uploadService.buildFileInfo(req, k, key);
+  }
+
   @Get('material/:materialId')
   @UseGuards(JwtAuthGuard)
   async downloadMaterial(
@@ -80,7 +117,8 @@ export class UploadController {
       materialId,
       req.user.sub,
     );
-    const { stream, contentType } = await this.s3.getObject(material.fileUrl);
+    const key = s3KeyFromUrl(material.fileUrl);
+    const { stream, contentType } = await this.s3.getObject(key);
     return new StreamableFile(stream, {
       type: contentType,
       disposition: `attachment; filename="${encodeURIComponent(material.title)}"`,

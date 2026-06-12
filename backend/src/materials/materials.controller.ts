@@ -7,28 +7,16 @@ import {
   Post,
   Query,
   Req,
-  UploadedFile,
   UseGuards,
-  UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
-import {
-  EducationLevel,
-  MaterialKind,
-  Subject,
-  UserRole,
-} from '@prisma/client';
+import { UserRole } from '@prisma/client';
 import type { Request } from 'express';
 import { MaterialsService } from './materials.service';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
-import { PaginationQueryDto } from '../common/dto/pagination.dto';
-import {
-  materialFileFilter,
-  multerLimits,
-  multerStorage,
-} from '../upload/multer.config';
+import { CreateMaterialDto } from './dto/create-material.dto';
+import { MaterialFilterQueryDto } from './dto/material-filter.query.dto';
 
 type AuthedRequest = Request & {
   user: { sub: string; email: string; role: UserRole };
@@ -40,34 +28,22 @@ export class MaterialsController {
   constructor(private readonly materialsService: MaterialsService) {}
 
   @Roles(UserRole.TUTOR)
-  @Post('upload')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: multerStorage,
-      fileFilter: materialFileFilter,
-      limits: multerLimits,
-    }),
-  )
-  async uploadMaterial(
-    @UploadedFile() file: Express.Multer.File,
+  @Post()
+  async createMaterial(
     @Req() req: AuthedRequest,
-    @Body('allowedStudents') allowedStudents: string | string[],
-    @Body('subject') subject?: Subject,
-    @Body('level') level?: EducationLevel,
-    @Body('kind') kind?: MaterialKind,
-    @Body('description') description?: string,
+    @Body() body: CreateMaterialDto,
   ) {
-    const studentsArray = Array.isArray(allowedStudents)
-      ? allowedStudents
-      : allowedStudents
-        ? [allowedStudents]
-        : [];
-
-    return this.materialsService.uploadMaterial(
-      file,
+    return this.materialsService.createMaterial(
+      body.fileUrl,
+      body.originalName,
       req.user.sub,
-      studentsArray,
-      { subject, level, kind, description },
+      body.allowedStudents ?? [],
+      {
+        subject: body.subject,
+        level: body.level,
+        kind: body.kind,
+        description: body.description,
+      },
     );
   }
 
@@ -75,35 +51,25 @@ export class MaterialsController {
   async getTutorMaterials(
     @Param('tutorProfileId') tutorProfileId: string,
     @Req() req: AuthedRequest,
-    @Query() pagination: PaginationQueryDto,
-    @Query('subject') subject?: string,
-    @Query('level') level?: string,
-    @Query('kind') kind?: string,
+    @Query() query: MaterialFilterQueryDto,
   ) {
     const ok = await this.materialsService.userOwnsTutorProfile(
       req.user.sub,
       tutorProfileId,
     );
     if (!ok) throw new ForbiddenException('Not your tutor profile');
-    return this.materialsService.getMaterialsForTutor(
-      tutorProfileId,
-      pagination,
-      {
-        subject: this.parseSubject(subject),
-        level: this.parseLevel(level),
-        kind: this.parseKind(kind),
-      },
-    );
+    return this.materialsService.getMaterialsForTutor(tutorProfileId, query, {
+      subject: query.subject,
+      level: query.level,
+      kind: query.kind,
+    });
   }
 
   @Get('student/:studentProfileId')
   async getStudentMaterials(
     @Param('studentProfileId') studentProfileId: string,
     @Req() req: AuthedRequest,
-    @Query() pagination: PaginationQueryDto,
-    @Query('subject') subject?: string,
-    @Query('level') level?: string,
-    @Query('kind') kind?: string,
+    @Query() query: MaterialFilterQueryDto,
   ) {
     const ok = await this.materialsService.userOwnsStudentProfile(
       req.user.sub,
@@ -112,32 +78,12 @@ export class MaterialsController {
     if (!ok) throw new ForbiddenException('Not your student profile');
     return this.materialsService.getMaterialsForStudent(
       studentProfileId,
-      pagination,
+      query,
       {
-        subject: this.parseSubject(subject),
-        level: this.parseLevel(level),
-        kind: this.parseKind(kind),
+        subject: query.subject,
+        level: query.level,
+        kind: query.kind,
       },
     );
-  }
-
-  private parseSubject(v?: string): Subject | undefined {
-    if (!v) return undefined;
-    const u = v.toUpperCase();
-    return Object.keys(Subject).includes(u) ? (u as Subject) : undefined;
-  }
-  private parseLevel(v?: string): EducationLevel | undefined {
-    if (!v) return undefined;
-    const u = v.toUpperCase();
-    return Object.keys(EducationLevel).includes(u)
-      ? (u as EducationLevel)
-      : undefined;
-  }
-  private parseKind(v?: string): MaterialKind | undefined {
-    if (!v) return undefined;
-    const u = v.toUpperCase();
-    return Object.keys(MaterialKind).includes(u)
-      ? (u as MaterialKind)
-      : undefined;
   }
 }

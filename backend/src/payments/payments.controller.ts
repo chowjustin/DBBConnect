@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Get,
@@ -8,11 +7,9 @@ import {
   Post,
   Query,
   Request,
-  UploadedFile,
   UseGuards,
   UseInterceptors,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { UserRole } from '@prisma/client';
 import { JwtAuthGuard } from '../auth/jwt-auth.guard';
 import { RolesGuard } from '../auth/roles.guard';
@@ -21,48 +18,24 @@ import { EmailVerified } from '../auth/email-verified.decorator';
 import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { IdempotencyInterceptor } from '../common/idempotency.interceptor';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
-import {
-  multerStorage,
-  materialFileFilter,
-  objectKey,
-} from '../upload/multer.config';
-import { S3Service } from '../s3/s3.service';
 import { PaymentsService } from './payments.service';
 import { RejectPaymentDto, UploadProofDto } from './dto/upload-proof.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard, EmailVerifiedGuard)
 @Controller('payments')
 export class PaymentsController {
-  constructor(
-    private readonly svc: PaymentsService,
-    private readonly s3: S3Service,
-  ) {}
+  constructor(private readonly svc: PaymentsService) {}
 
   @EmailVerified()
   @Post('upload-proof')
   @UseInterceptors(IdempotencyInterceptor)
-  @UseInterceptors(
-    FileInterceptor('proofImage', {
-      storage: multerStorage,
-      fileFilter: materialFileFilter,
-      limits: { fileSize: 5 * 1024 * 1024 },
-    }),
-  )
-  async uploadProof(
-    @Request() req,
-    @Body() dto: UploadProofDto,
-    @UploadedFile() file: Express.Multer.File,
-  ) {
-    if (!file) throw new BadRequestException('proofImage required');
-    const key = objectKey('payments', file.originalname);
-    await this.s3.putObject(key, file.buffer, file.mimetype);
-    const proofUrl = key;
+  async uploadProof(@Request() req, @Body() dto: UploadProofDto) {
     return this.svc.uploadProof(
       req.user.sub,
       dto.kind,
       dto.refId,
       dto.method,
-      proofUrl,
+      dto.proofUrl,
       dto.promoCode,
     );
   }

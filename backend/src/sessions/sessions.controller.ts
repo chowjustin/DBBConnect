@@ -21,6 +21,7 @@ import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionStatusDto } from './dto/update-session-status.dto';
 import { SkipTransform } from '../common/skip-transform.decorator';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { ListSessionsQueryDto } from './dto/list-sessions.query.dto';
 
 @UseGuards(JwtAuthGuard, RolesGuard, EmailVerifiedGuard)
 @Controller('sessions')
@@ -51,22 +52,14 @@ export class SessionsController {
 
   @Roles(UserRole.STUDENT)
   @Get('student')
-  listStudent(
-    @Request() req,
-    @Query() pagination: PaginationQueryDto,
-    @Query('past') past?: string,
-  ) {
-    return this.svc.listForStudent(req.user.email, pagination, past === 'true');
+  listStudent(@Request() req, @Query() query: ListSessionsQueryDto) {
+    return this.svc.listForStudent(req.user.email, query, query.past ?? false);
   }
 
   @Roles(UserRole.TUTOR)
   @Get('tutor')
-  listTutor(
-    @Request() req,
-    @Query() pagination: PaginationQueryDto,
-    @Query('past') past?: string,
-  ) {
-    return this.svc.listForTutor(req.user.email, pagination, past === 'true');
+  listTutor(@Request() req, @Query() query: ListSessionsQueryDto) {
+    return this.svc.listForTutor(req.user.email, query, query.past ?? false);
   }
 
   @SkipTransform()
