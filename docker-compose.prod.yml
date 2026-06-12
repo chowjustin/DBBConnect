@@ -38,7 +38,7 @@ services:
     #         - '127.0.0.1:8099:8098'
 
     backend:
-        image: ghcr.io/chowjustin/dbbconnect:latest
+        image: ghcr.io/chowjustin/tutorconnect:latest
         restart: unless-stopped
         env_file:
             - .env

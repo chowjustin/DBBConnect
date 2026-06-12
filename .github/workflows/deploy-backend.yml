@@ -91,7 +91,7 @@ jobs:
               with:
                   context: ./backend
                   push: true
-                  tags: ghcr.io/${{ github.repository_owner }}/dbbconnect:latest
+                  tags: ghcr.io/${{ github.repository_owner }}/tutorconnect:latest
                   cache-from: type=gha
                   cache-to: type=gha,mode=max
 
