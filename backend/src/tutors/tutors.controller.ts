@@ -139,6 +139,12 @@ export class AdminTutorsController {
   }
 
   @Roles(UserRole.ADMIN)
+  @Get('verification/history')
+  listVerificationHistory(@Query() pagination: PaginationQueryDto) {
+    return this.tutorsService.listVerificationHistory(pagination);
+  }
+
+  @Roles(UserRole.ADMIN)
   @Patch(':id/verification')
   review(@Param('id') id: string, @Body() dto: ReviewVerificationDto) {
     return this.tutorsService.reviewVerification(id, dto.status, dto.notes);

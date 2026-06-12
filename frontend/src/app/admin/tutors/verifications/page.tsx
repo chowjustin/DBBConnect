@@ -16,6 +16,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { PageHeader } from '@/components/ui/page-header';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -29,25 +30,30 @@ interface VerificationItem {
   bio: string | null;
   idDocumentUrl: string | null;
   educationProofUrl: string | null;
+  verificationStatus?: 'PENDING' | 'VERIFIED' | 'REJECTED';
   user: { id: string; name: string; email: string };
 }
 
 export default function AdminVerificationsPage() {
   const qc = useQueryClient();
   const { params } = usePagination();
+  const [history, setHistory] = React.useState(false);
 
   const [slides, setSlides] = React.useState<{ src: string }[]>([]);
   const [open, setOpen] = React.useState(false);
   const [approveTarget, setApproveTarget] = React.useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = React.useState<string | null>(null);
 
+  const endpoint = history
+    ? '/admin/tutors/verification/history'
+    : '/admin/tutors/verification';
   const { data, isLoading } = useQuery<{
     data: VerificationItem[];
     meta: PaginatedApiResponse<VerificationItem[]>['meta'];
   }>({
-    queryKey: ['/admin/tutors/verification', params],
+    queryKey: [endpoint, params],
     queryFn: async () => {
-      const res = await api.get('/admin/tutors/verification', { params });
+      const res = await api.get(endpoint, { params });
       return res.data;
     },
   });
@@ -70,6 +76,9 @@ export default function AdminVerificationsPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['/admin/tutors/verification'] });
+      qc.invalidateQueries({
+        queryKey: ['/admin/tutors/verification/history'],
+      });
       notifySuccess('Verifikasi diperbarui');
     },
     onError: (e) => notifyAxiosError(e),
@@ -91,9 +100,22 @@ export default function AdminVerificationsPage() {
     <div className='space-y-6'>
       <PageHeader
         icon={UserCheck}
-        title='Verifikasi Tutor'
-        description='Tinjau dokumen identitas dan ijazah.'
+        title={history ? 'Riwayat Verifikasi' : 'Verifikasi Tutor'}
+        description={
+          history
+            ? 'Tutor yang sudah disetujui atau ditolak.'
+            : 'Tinjau dokumen identitas dan ijazah.'
+        }
       />
+      <Tabs
+        value={history ? 'history' : 'queue'}
+        onValueChange={(v) => setHistory(v === 'history')}
+      >
+        <TabsList>
+          <TabsTrigger value='queue'>Antrian</TabsTrigger>
+          <TabsTrigger value='history'>Riwayat</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {isLoading ? (
         <Skeleton className='h-40 w-full' />
@@ -137,18 +159,32 @@ export default function AdminVerificationsPage() {
                   )}
                 </TableCell>
                 <TableCell>
-                  <div className='flex gap-2'>
-                    <Button size='sm' onClick={() => setApproveTarget(v.id)}>
-                      Setujui
-                    </Button>
-                    <Button
-                      size='sm'
-                      variant='destructive'
-                      onClick={() => setRejectTarget(v.id)}
+                  {history ? (
+                    <span
+                      className={`inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium ${
+                        v.verificationStatus === 'VERIFIED'
+                          ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                          : 'border-rose-200 bg-rose-50 text-rose-700'
+                      }`}
                     >
-                      Tolak
-                    </Button>
-                  </div>
+                      {v.verificationStatus === 'VERIFIED'
+                        ? 'Disetujui'
+                        : 'Ditolak'}
+                    </span>
+                  ) : (
+                    <div className='flex gap-2'>
+                      <Button size='sm' onClick={() => setApproveTarget(v.id)}>
+                        Setujui
+                      </Button>
+                      <Button
+                        size='sm'
+                        variant='destructive'
+                        onClick={() => setRejectTarget(v.id)}
+                      >
+                        Tolak
+                      </Button>
+                    </div>
+                  )}
                 </TableCell>
               </TableRow>
             ))}

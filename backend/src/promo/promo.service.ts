@@ -5,11 +5,28 @@ import {
 } from '@nestjs/common';
 import { PaymentKind } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
+import { PaginationQueryDto } from '../common/dto/pagination.dto';
+import { paginatePrisma } from '../common/paginate';
 import { CreatePromoCodeDto } from './dto/promo.dto';
 
 @Injectable()
 export class PromoService {
   constructor(private prisma: PrismaService) {}
+
+  list(pagination: PaginationQueryDto) {
+    return paginatePrisma(this.prisma.promoCode, pagination, {
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async setActive(id: string, active: boolean) {
+    const promo = await this.prisma.promoCode.findUnique({ where: { id } });
+    if (!promo) throw new NotFoundException('Promo not found');
+    return this.prisma.promoCode.update({
+      where: { id },
+      data: { active },
+    });
+  }
 
   create(adminId: string, dto: CreatePromoCodeDto) {
     return this.prisma.promoCode.create({
@@ -29,6 +46,7 @@ export class PromoService {
   async preview(kind: PaymentKind, refId: string, code: string) {
     const promo = await this.prisma.promoCode.findUnique({ where: { code } });
     if (!promo) throw new NotFoundException('Promo not found');
+    if (!promo.active) throw new BadRequestException('Promo not active');
     if (promo.currentUses >= promo.maxUses)
       throw new BadRequestException('Promo exhausted');
     if (new Date() > promo.validUntil)

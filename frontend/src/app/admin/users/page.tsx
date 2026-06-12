@@ -7,6 +7,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableEmpty,
   TableHead,
   TableHeader,
   TableRow,
@@ -18,9 +19,15 @@ import { formatDateId } from '@/lib/format';
 import { roleLabel } from '@/constant/enums';
 import { usePagination } from '@/hooks/use-pagination';
 import type { PaginatedApiResponse } from '@/types/api';
-import type { User } from '@/types/shared';
+import type { Role, User } from '@/types/shared';
 import * as React from 'react';
 import { useDebounce } from '@/hooks/use-debounce';
+
+const ROLE_BADGE: Record<Role, string> = {
+  ADMIN: 'border-rose-200 bg-rose-50 text-rose-700',
+  TUTOR: 'border-primary-200 bg-primary-50 text-primary-800',
+  STUDENT: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+};
 
 export default function AdminUsersPage() {
   const { params, setParams } = usePagination();
@@ -65,16 +72,25 @@ export default function AdminUsersPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.data.map((u) => (
-              <TableRow key={u.id}>
-                <TableCell>{u.name}</TableCell>
-                <TableCell>{u.email}</TableCell>
-                <TableCell>
-                  <Badge variant='secondary'>{roleLabel(u.role)}</Badge>
-                </TableCell>
-                <TableCell>{formatDateId(u.createdAt)}</TableCell>
-              </TableRow>
-            ))}
+            {data?.data.length === 0 ? (
+              <TableEmpty colSpan={4}>Tidak ada pengguna.</TableEmpty>
+            ) : (
+              data?.data.map((u) => (
+                <TableRow key={u.id}>
+                  <TableCell>{u.name}</TableCell>
+                  <TableCell>{u.email}</TableCell>
+                  <TableCell>
+                    <Badge
+                      variant='secondary'
+                      className={`border ${ROLE_BADGE[u.role]}`}
+                    >
+                      {roleLabel(u.role)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDateId(u.createdAt)}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       )}

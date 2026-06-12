@@ -14,6 +14,7 @@ export function useConfirmPayment() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['/admin/payments'] });
+      qc.invalidateQueries({ queryKey: ['/admin/payments/history'] });
       notifySuccess('Pembayaran dikonfirmasi');
     },
     onError: (e) => notifyAxiosError(e),
@@ -29,6 +30,7 @@ export function useRejectPayment() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['/admin/payments'] });
+      qc.invalidateQueries({ queryKey: ['/admin/payments/history'] });
       notifySuccess('Pembayaran ditolak');
     },
     onError: (e) => notifyAxiosError(e),

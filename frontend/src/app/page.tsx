@@ -161,7 +161,7 @@ function Hero() {
   };
 
   return (
-    <section className='relative overflow-hidden pt-12 pb-24 sm:pt-20 md:pt-28 md:pb-36'>
+    <section className='relative overflow-hidden pt-10 pb-16 sm:pt-20 sm:pb-24 md:pt-28 md:pb-36'>
       {/* Layered radial backdrop, single source of warmth */}
       <div className='pointer-events-none absolute inset-0 -z-10'>
         <div
@@ -201,7 +201,7 @@ function Hero() {
             </span>
           </div>
 
-          <h1 className='text-foreground text-5xl leading-[0.92] font-semibold tracking-[-0.04em] text-balance sm:text-6xl md:text-[5.5rem]'>
+          <h1 className='text-foreground text-4xl leading-[0.95] font-semibold tracking-[-0.04em] text-balance sm:text-5xl sm:leading-[0.92] md:text-6xl lg:text-[5.5rem]'>
             Cari tutor yang
             <br />
             <span className='relative inline-block'>
@@ -223,7 +223,7 @@ function Hero() {
             </span>
           </h1>
 
-          <p className='text-muted-foreground mt-8 max-w-xl text-base text-pretty md:text-lg'>
+          <p className='text-muted-foreground mt-6 max-w-xl text-base text-pretty sm:mt-8 md:text-lg'>
             Pilih dari ratusan tutor terverifikasi di seluruh Indonesia. Bayar
             transparan, sesi dikonfirmasi admin sebelum dana dilepas.
           </p>
@@ -249,8 +249,9 @@ function Hero() {
               placeholder='Mata pelajaran, misal: Matematika SMA'
               className='placeholder:text-muted-foreground min-w-0 flex-1 bg-transparent px-2 text-sm outline-none'
             />
-            <Button type='submit' size='default' className='gap-1'>
-              Cari tutor <ArrowRight className='size-3.5' />
+            <Button type='submit' size='default' className='shrink-0 gap-1'>
+              Cari<span className='hidden sm:inline'> tutor</span>
+              <ArrowRight className='size-3.5' />
             </Button>
           </form>
           <div className='mt-3 flex flex-wrap items-center gap-1.5'>
@@ -434,7 +435,7 @@ function TrustStrip() {
 
 function Features() {
   return (
-    <section id='fitur' className='py-24 md:py-32'>
+    <section id='fitur' className='py-16 sm:py-24 md:py-32'>
       <div className='layout'>
         <div className='max-w-2xl'>
           <h2 className='text-foreground text-3xl font-semibold tracking-[-0.025em] text-balance md:text-4xl'>
@@ -449,7 +450,7 @@ function Features() {
         {/* Asymmetric 2-col layout: big lead + list */}
         <div className='mt-12 grid gap-8 md:grid-cols-[1.3fr_1fr] md:gap-12'>
           {/* Lead feature: tinted full-bleed panel */}
-          <article className='border-primary-100 from-primary-50/60 group flex flex-col justify-between overflow-hidden rounded-2xl border bg-gradient-to-br to-white p-8 md:p-10'>
+          <article className='border-primary-100 from-primary-50/60 group flex flex-col justify-between overflow-hidden rounded-2xl border bg-gradient-to-br to-white p-6 sm:p-8 md:p-10'>
             <div>
               <div className='bg-primary-600 text-primary-foreground shadow-primary-500/20 inline-flex items-center justify-center rounded-lg p-2.5 shadow-sm'>
                 <ShieldCheck className='size-5' />
@@ -540,7 +541,7 @@ function Steps() {
   return (
     <section
       id='cara'
-      className='border-primary-100 bg-primary-50/30 border-y py-24 md:py-32'
+      className='border-primary-100 bg-primary-50/30 border-y py-16 sm:py-24 md:py-32'
     >
       <div className='layout'>
         <div className='flex items-end justify-between gap-6'>
@@ -560,7 +561,7 @@ function Steps() {
         {/* Horizontal stepper, no circle numbers */}
         <ol className='bg-primary-100 mt-14 grid gap-px overflow-hidden rounded-2xl md:grid-cols-3'>
           {STEPS.map((s, i) => (
-            <li key={s.title} className='bg-white p-6 md:p-8'>
+            <li key={s.title} className='bg-white p-5 sm:p-6 md:p-8'>
               <div className='text-primary-600 mono mb-4 text-xs font-semibold tracking-widest tabular-nums'>
                 {String(i + 1).padStart(2, '0')} /{' '}
                 {String(STEPS.length).padStart(2, '0')}
@@ -581,7 +582,7 @@ function Steps() {
 
 function Pricing() {
   return (
-    <section id='harga' className='py-24 md:py-32'>
+    <section id='harga' className='py-16 sm:py-24 md:py-32'>
       <div className='layout'>
         <div className='max-w-2xl'>
           <h2 className='text-foreground text-3xl font-semibold tracking-[-0.025em] text-balance md:text-4xl'>
@@ -654,7 +655,7 @@ function PricingCard({
   const isHi = variant === 'highlight';
   return (
     <article
-      className={`relative flex flex-col rounded-2xl p-8 md:p-10 ${
+      className={`relative flex flex-col rounded-2xl p-6 sm:p-8 md:p-10 ${
         isHi
           ? 'border-primary-300 ring-primary-200/50 shadow-primary-500/5 border bg-white shadow-md ring-2'
           : 'border-primary-100 border bg-white'
@@ -668,7 +669,7 @@ function PricingCard({
       <h3 className='text-foreground text-xl font-semibold'>{name}</h3>
       <p className='text-muted-foreground mt-1 text-sm'>{description}</p>
       <div className='mt-6 flex items-baseline gap-1'>
-        <span className='mono text-foreground text-4xl font-semibold tabular-nums'>
+        <span className='mono text-foreground text-3xl font-semibold tabular-nums sm:text-4xl'>
           {price}
         </span>
         <span className='text-muted-foreground text-sm'>{cadence}</span>
@@ -730,7 +731,7 @@ function Testimonials() {
   const supporting = TESTIMONIALS.filter((t) => !t.featured);
 
   return (
-    <section className='border-primary-100 bg-primary-50/30 border-y py-24 md:py-32'>
+    <section className='border-primary-100 bg-primary-50/30 border-y py-16 sm:py-24 md:py-32'>
       <div className='layout grid items-start gap-10 md:grid-cols-[1.4fr_1fr] md:gap-14'>
         <figure>
           <div className='flex gap-0.5 text-amber-500'>
@@ -801,7 +802,7 @@ const FAQS = [
 
 function FAQ() {
   return (
-    <section id='faq' className='py-24 md:py-32'>
+    <section id='faq' className='py-16 sm:py-24 md:py-32'>
       <div className='layout grid gap-12 md:grid-cols-[1fr_2fr]'>
         <div>
           <h2 className='text-foreground text-3xl font-semibold tracking-[-0.025em] text-balance md:text-4xl'>
@@ -833,7 +834,7 @@ function FAQ() {
 
 function Cta() {
   return (
-    <section className='py-24 md:py-32'>
+    <section className='py-16 sm:py-24 md:py-32'>
       <div className='layout'>
         <div className='border-primary-100 from-primary-50 via-secondary-50/40 to-primary-100/60 relative overflow-hidden rounded-3xl border bg-gradient-to-br'>
           {/* Indigo dot grid texture */}
@@ -865,14 +866,14 @@ function Cta() {
             }}
           />
 
-          <div className='relative grid items-center gap-10 px-8 py-16 md:grid-cols-[1.4fr_1fr] md:gap-16 md:px-16 md:py-20'>
+          <div className='relative grid items-center gap-10 px-6 py-12 sm:px-8 sm:py-16 md:grid-cols-[1.4fr_1fr] md:gap-16 md:px-16 md:py-20'>
             {/* Left: pitch */}
             <div className='max-w-xl'>
               <div className='border-secondary-200 bg-secondary-50 text-secondary-800 mb-5 inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-medium'>
                 <Sparkles className='size-3' />
                 Daftar gratis, tanpa kartu kredit
               </div>
-              <h2 className='text-foreground text-4xl leading-[1.05] font-semibold tracking-[-0.03em] text-balance md:text-5xl lg:text-6xl'>
+              <h2 className='text-foreground text-3xl leading-[1.1] font-semibold tracking-[-0.03em] text-balance sm:text-4xl sm:leading-[1.05] md:text-5xl lg:text-6xl'>
                 Tutor pertama Anda <br className='hidden md:block' />
                 <span className='text-primary-700 italic'>menunggu.</span>
               </h2>
@@ -928,7 +929,7 @@ function Cta() {
                 <p className='text-muted-foreground text-xs font-medium tracking-wider uppercase'>
                   Tutor aktif sekarang
                 </p>
-                <p className='mono text-primary-700 mt-2 text-6xl leading-none font-semibold tabular-nums md:text-7xl'>
+                <p className='mono text-primary-700 mt-2 text-5xl leading-none font-semibold tabular-nums sm:text-6xl md:text-7xl'>
                   127
                 </p>
                 <p className='text-muted-foreground mt-2 text-sm'>

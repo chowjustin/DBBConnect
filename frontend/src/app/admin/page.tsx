@@ -1,21 +1,36 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
-import { CreditCard, LayoutDashboard, PiggyBank, UserCheck } from 'lucide-react';
+import {
+  CreditCard,
+  LayoutDashboard,
+  PiggyBank,
+  UserCheck,
+} from 'lucide-react';
 
 import { PageHeader } from '@/components/ui/page-header';
 import { KpiCard } from '@/components/ui/kpi-card';
 
+interface QueueCounts {
+  pending: number;
+  done: number;
+  total: number;
+}
+
 interface AdminOverview {
-  pendingVerifications: number;
-  underReviewPayments: number;
-  requestedPayouts: number;
+  queues: {
+    verifications: QueueCounts;
+    payments: QueueCounts;
+    payouts: QueueCounts;
+  };
 }
 
 export default function AdminDashboardPage() {
   const { data, isLoading } = useQuery<AdminOverview>({
     queryKey: ['/admin/analytics/overview'],
   });
+
+  const q = data?.queues;
 
   return (
     <div className='space-y-6'>
@@ -28,22 +43,34 @@ export default function AdminDashboardPage() {
         <KpiCard
           icon={UserCheck}
           accent='primary'
-          label='Verifikasi Pending'
-          value={String(data?.pendingVerifications ?? 0)}
+          label='Verifikasi Tutor'
+          value={String(q?.verifications.pending ?? 0)}
+          unit='pending'
+          sublabel={
+            q
+              ? `${q.verifications.done} / ${q.verifications.total} selesai`
+              : '—'
+          }
           loading={isLoading}
         />
         <KpiCard
           icon={CreditCard}
           accent='sky'
-          label='Pembayaran Diperiksa'
-          value={String(data?.underReviewPayments ?? 0)}
+          label='Pembayaran'
+          value={String(q?.payments.pending ?? 0)}
+          unit='pending'
+          sublabel={
+            q ? `${q.payments.done} / ${q.payments.total} selesai` : '—'
+          }
           loading={isLoading}
         />
         <KpiCard
           icon={PiggyBank}
           accent='amber'
-          label='Pencairan Diajukan'
-          value={String(data?.requestedPayouts ?? 0)}
+          label='Pencairan'
+          value={String(q?.payouts.pending ?? 0)}
+          unit='pending'
+          sublabel={q ? `${q.payouts.done} / ${q.payouts.total} selesai` : '—'}
           loading={isLoading}
         />
       </div>

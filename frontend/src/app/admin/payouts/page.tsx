@@ -11,6 +11,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableEmpty,
   TableHead,
   TableHeader,
   TableRow,
@@ -27,6 +28,7 @@ import {
 } from '@/components/ui/dialog';
 import { Dropzone } from '@/components/form/dropzone-field';
 import { Label } from '@/components/ui/label';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { formatDateTimeId, formatRupiah } from '@/lib/format';
 import { usePagination } from '@/hooks/use-pagination';
 import { notifyAxiosError, notifyError, notifySuccess } from '@/lib/toast';
@@ -47,6 +49,7 @@ interface PayoutRow {
 export default function AdminPayoutsPage() {
   const qc = useQueryClient();
   const { params } = usePagination();
+  const [history, setHistory] = React.useState(false);
   const [target, setTarget] = React.useState<PayoutRow | null>(null);
   const [proof, setProof] = React.useState<File | null>(null);
 
@@ -54,13 +57,14 @@ export default function AdminPayoutsPage() {
     if (!target) setProof(null);
   }, [target]);
 
+  const endpoint = history ? '/admin/payouts/history' : '/admin/payouts';
   const { data, isLoading } = useQuery<{
     data: PayoutRow[];
     meta: PaginatedApiResponse<PayoutRow[]>['meta'];
   }>({
-    queryKey: ['/admin/payouts', params],
+    queryKey: [endpoint, params],
     queryFn: async () => {
-      const res = await api.get('/admin/payouts', { params });
+      const res = await api.get(endpoint, { params });
       return res.data;
     },
   });
@@ -75,6 +79,7 @@ export default function AdminPayoutsPage() {
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ['/admin/payouts'] });
+      qc.invalidateQueries({ queryKey: ['/admin/payouts/history'] });
       notifySuccess('Ditandai sebagai dibayar');
       setTarget(null);
     },
@@ -92,7 +97,18 @@ export default function AdminPayoutsPage() {
 
   return (
     <div className='space-y-4'>
-      <h1 className='h2'>Antrian Pencairan</h1>
+      <h1 className='h2'>
+        {history ? 'Riwayat Pencairan' : 'Antrian Pencairan'}
+      </h1>
+      <Tabs
+        value={history ? 'history' : 'queue'}
+        onValueChange={(v) => setHistory(v === 'history')}
+      >
+        <TabsList>
+          <TabsTrigger value='queue'>Antrian</TabsTrigger>
+          <TabsTrigger value='history'>Riwayat</TabsTrigger>
+        </TabsList>
+      </Tabs>
       {isLoading ? (
         <Skeleton className='h-40 w-full' />
       ) : (
@@ -108,34 +124,44 @@ export default function AdminPayoutsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.data.map((p) => (
-              <TableRow key={p.id}>
-                <TableCell>{formatDateTimeId(p.requestedAt)}</TableCell>
-                <TableCell>
-                  <div>{p.tutor?.user.name ?? '—'}</div>
-                  <div className='text-muted-foreground text-xs'>
-                    {p.tutor?.user.email}
-                  </div>
-                </TableCell>
-                <TableCell>
-                  <div>{p.bankName}</div>
-                  <div className='text-muted-foreground text-xs'>
-                    {p.bankAccount} a.n. {p.accountHolder}
-                  </div>
-                </TableCell>
-                <TableCell className='mono'>{formatRupiah(p.amount)}</TableCell>
-                <TableCell>
-                  <StatusBadge kind='payout' status={p.status} />
-                </TableCell>
-                <TableCell>
-                  {p.status === 'REQUESTED' ? (
-                    <Button size='sm' onClick={() => setTarget(p)}>
-                      Tandai Dibayar
-                    </Button>
-                  ) : null}
-                </TableCell>
-              </TableRow>
-            ))}
+            {data?.data.length === 0 ? (
+              <TableEmpty colSpan={6}>
+                {history
+                  ? 'Belum ada riwayat pencairan.'
+                  : 'Antrian pencairan kosong.'}
+              </TableEmpty>
+            ) : (
+              data?.data.map((p) => (
+                <TableRow key={p.id}>
+                  <TableCell>{formatDateTimeId(p.requestedAt)}</TableCell>
+                  <TableCell>
+                    <div>{p.tutor?.user.name ?? '—'}</div>
+                    <div className='text-muted-foreground text-xs'>
+                      {p.tutor?.user.email}
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <div>{p.bankName}</div>
+                    <div className='text-muted-foreground text-xs'>
+                      {p.bankAccount} a.n. {p.accountHolder}
+                    </div>
+                  </TableCell>
+                  <TableCell className='mono'>
+                    {formatRupiah(p.amount)}
+                  </TableCell>
+                  <TableCell>
+                    <StatusBadge kind='payout' status={p.status} />
+                  </TableCell>
+                  <TableCell>
+                    {p.status === 'REQUESTED' ? (
+                      <Button size='sm' onClick={() => setTarget(p)}>
+                        Tandai Dibayar
+                      </Button>
+                    ) : null}
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       )}

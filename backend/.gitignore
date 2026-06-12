@@ -60,3 +60,5 @@ uploads
 # Local planning docs (not for upstream)
 COMMIT_PLAN*.md
 IMPROVEMENT_PLAN.md
+
+prisma/migrations

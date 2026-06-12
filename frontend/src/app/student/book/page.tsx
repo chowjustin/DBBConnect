@@ -161,17 +161,17 @@ export default function BookSessionPage() {
 
   const onSubmit = methods.handleSubmit((v) => book.mutate(v));
 
-  const canNext = (() => {
-    if (step === 0) return !!values.tutorId;
-    if (step === 1)
-      return (
-        !!values.date &&
-        !!values.startTime &&
-        !!values.endTime &&
-        values.startTime < values.endTime
-      );
-    return true;
-  })();
+  const STEP_FIELDS: Record<number, (keyof BookForm)[]> = {
+    0: ['tutorId'],
+    1: ['date', 'startTime', 'endTime', 'format', 'mode'],
+    2: [],
+  };
+
+  const handleNext = async () => {
+    const ok = await methods.trigger(STEP_FIELDS[step], { shouldFocus: true });
+    if (!ok) return;
+    setStep((s) => s + 1);
+  };
 
   return (
     <div className='space-y-6'>
@@ -361,11 +361,7 @@ export default function BookSessionPage() {
               Kembali
             </Button>
             {step < 2 ? (
-              <Button
-                type='button'
-                onClick={() => setStep((s) => s + 1)}
-                disabled={!canNext}
-              >
+              <Button type='button' onClick={handleNext}>
                 Lanjut
               </Button>
             ) : (

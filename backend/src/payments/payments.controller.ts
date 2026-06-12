@@ -58,6 +58,12 @@ export class AdminPaymentsController {
   }
 
   @Roles(UserRole.ADMIN)
+  @Get('history')
+  listHistory(@Query() pagination: PaginationQueryDto) {
+    return this.svc.listHistory(pagination);
+  }
+
+  @Roles(UserRole.ADMIN)
   @Patch(':id/confirm')
   confirm(@Request() req, @Param('id') id: string) {
     return this.svc.confirm(req.user.sub, id);

@@ -182,6 +182,7 @@ function DocSlot({
             size='icon-sm'
             aria-label='Hapus dokumen'
             onClick={onClear}
+            className='text-rose-600 hover:bg-rose-50 hover:text-rose-700'
           >
             ✕
           </Button>

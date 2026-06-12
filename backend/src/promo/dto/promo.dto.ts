@@ -1,6 +1,6 @@
-import { Type } from 'class-transformer';
 import {
   IsArray,
+  IsBoolean,
   IsDateString,
   IsEnum,
   IsInt,
@@ -36,6 +36,11 @@ export class CreatePromoCodeDto {
   @IsInt()
   @Min(0)
   minAmount?: number;
+}
+
+export class SetPromoActiveDto {
+  @IsBoolean()
+  active: boolean;
 }
 
 export class PreviewDiscountDto {

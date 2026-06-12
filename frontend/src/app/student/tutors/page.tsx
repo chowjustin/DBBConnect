@@ -18,6 +18,7 @@ import { useDebounce } from '@/hooks/use-debounce';
 
 import { TutorCard } from './components/tutor-card';
 import { useTutorSearch } from './hooks/query';
+import { useActiveApplicationByTutor } from './hooks/use-my-applications';
 import type { TutorSearchFilters } from './types';
 
 export default function StudentTutorsPage() {
@@ -33,6 +34,7 @@ export default function StudentTutorsPage() {
 
   const filters: TutorSearchFilters = { name: params.search || undefined };
   const { data, isLoading } = useTutorSearch(filters, params);
+  const { map: appMap } = useActiveApplicationByTutor();
   const tutors = data?.data ?? [];
   const meta = data?.meta;
 
@@ -65,7 +67,11 @@ export default function StudentTutorsPage() {
       ) : (
         <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3'>
           {tutors.map((t) => (
-            <TutorCard key={t.id} tutor={t} />
+            <TutorCard
+              key={t.id}
+              tutor={t}
+              applicationStatus={appMap.get(t.id)}
+            />
           ))}
         </div>
       )}

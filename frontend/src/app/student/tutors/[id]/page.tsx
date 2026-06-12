@@ -5,7 +5,6 @@ import { useQuery } from '@tanstack/react-query';
 import { useParams } from 'next/navigation';
 import { GraduationCap, Star } from 'lucide-react';
 
-import api from '@/lib/api';
 import {
   educationLevelLabels,
   subjectLabels,
@@ -18,6 +17,8 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { PageHeader } from '@/components/ui/page-header';
 import { formatRupiah } from '@/lib/format';
+
+import { useActiveApplicationByTutor } from '../hooks/use-my-applications';
 
 import { ApplyDialog } from './components/apply-dialog';
 
@@ -38,12 +39,6 @@ interface ReviewsAggregate {
   average: number;
 }
 
-interface MyApplication {
-  id: string;
-  tutorId: string;
-  status: 'PENDING' | 'ACCEPTED' | 'REJECTED';
-}
-
 export default function StudentTutorDetailPage() {
   const params = useParams<{ id: string }>();
   const tutorId = params.id;
@@ -59,21 +54,8 @@ export default function StudentTutorDetailPage() {
     enabled: !!tutorId,
   });
 
-  const myAppsQ = useQuery<{ data: MyApplication[] }>({
-    queryKey: ['/applications/student', { per_page: 50 }],
-    queryFn: async () => {
-      const res = await api.get('/applications/student', {
-        params: { per_page: 50 },
-      });
-      return res.data;
-    },
-  });
-
-  const existingApp = myAppsQ.data?.data.find(
-    (a) =>
-      a.tutorId === tutorId &&
-      (a.status === 'PENDING' || a.status === 'ACCEPTED'),
-  );
+  const { map: appMap, isLoading: appsLoading } = useActiveApplicationByTutor();
+  const existingStatus = appMap.get(tutorId);
 
   const t = tutorQ.data;
   const initials = (t?.user.name ?? '')
@@ -144,16 +126,16 @@ export default function StudentTutorDetailPage() {
               />
             </div>
 
-            {existingApp ? (
+            {existingStatus ? (
               <div className='border-primary-100 bg-primary-50/50 flex flex-col gap-1 rounded-lg border p-4 sm:flex-row sm:items-center sm:justify-between'>
                 <div className='text-sm'>
                   <div className='font-semibold'>
-                    {existingApp.status === 'ACCEPTED'
+                    {existingStatus === 'ACCEPTED'
                       ? 'Sudah diterima oleh tutor'
                       : 'Aplikasi sedang ditinjau'}
                   </div>
                   <div className='text-muted-foreground text-xs'>
-                    {existingApp.status === 'ACCEPTED'
+                    {existingStatus === 'ACCEPTED'
                       ? 'Lanjut ke Pesan Sesi untuk menjadwalkan.'
                       : 'Tunggu tutor menerima aplikasi Anda.'}
                   </div>
@@ -161,12 +143,12 @@ export default function StudentTutorDetailPage() {
                 <Badge
                   variant='secondary'
                   className={
-                    existingApp.status === 'ACCEPTED'
+                    existingStatus === 'ACCEPTED'
                       ? 'border border-emerald-200 bg-emerald-50 text-emerald-700'
                       : 'border-primary-200 bg-primary-100 text-primary-800 border'
                   }
                 >
-                  {existingApp.status === 'ACCEPTED' ? 'Diterima' : 'Menunggu'}
+                  {existingStatus === 'ACCEPTED' ? 'Diterima' : 'Menunggu'}
                 </Badge>
               </div>
             ) : (
@@ -174,7 +156,7 @@ export default function StudentTutorDetailPage() {
                 size='lg'
                 onClick={() => setOpen(true)}
                 className='w-full sm:w-auto'
-                disabled={myAppsQ.isLoading}
+                disabled={appsLoading}
               >
                 Ajukan Belajar
               </Button>

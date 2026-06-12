@@ -162,6 +162,7 @@ export default function AvailabilityPage() {
                       size='icon'
                       aria-label='Hapus slot'
                       onClick={() => remove(i)}
+                      className='text-rose-600 hover:bg-rose-50 hover:text-rose-700'
                     >
                       <Trash2 className='size-4' />
                     </Button>

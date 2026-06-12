@@ -17,7 +17,7 @@ import * as bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 const DEFAULT_PASSWORD = 'password123';
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_PASSWORD = 'password123';
 
 async function ensureUser(
   email: string,
@@ -213,10 +213,18 @@ async function main() {
 
   console.log('\nDev seed complete.\n');
   console.log('Accounts (password: password123 unless noted):');
-  console.log('  ADMIN   admin@tutorconnect.id            (password: admin123)');
-  console.log('  TUTOR   tutor@tutorconnect.id            (verified + published, Math/Physics)');
-  console.log('  TUTOR   tutor2@tutorconnect.id           (verified + published, CS/Math)');
-  console.log('  TUTOR   tutor.pending@tutorconnect.id    (pending verification, English)');
+  console.log(
+    '  ADMIN   admin@tutorconnect.id            (password: password123)',
+  );
+  console.log(
+    '  TUTOR   tutor@tutorconnect.id            (verified + published, Math/Physics)',
+  );
+  console.log(
+    '  TUTOR   tutor2@tutorconnect.id           (verified + published, CS/Math)',
+  );
+  console.log(
+    '  TUTOR   tutor.pending@tutorconnect.id    (pending verification, English)',
+  );
   console.log('  STUDENT student@tutorconnect.id          (SMA 12)');
   console.log('  STUDENT student2@tutorconnect.id         (university)');
   console.log('Platform bank: BCA 9876543210 a.n. PT TutorConnect');

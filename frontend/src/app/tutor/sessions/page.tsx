@@ -17,6 +17,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { PageHeader } from '@/components/ui/page-header';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState } from '@/components/ui/empty-state';
 import { formatDateTimeId } from '@/lib/format';
 import { classFormatLabel } from '@/constant/enums';
@@ -49,16 +50,16 @@ export default function TutorSessionsPage() {
         icon={CalendarDays}
         title='Sesi'
         description={past ? 'Riwayat sesi mengajar.' : 'Sesi mendatang.'}
-        actions={
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => setPast((p) => !p)}
-          >
-            {past ? 'Mendatang' : 'Riwayat'}
-          </Button>
-        }
       />
+      <Tabs
+        value={past ? 'past' : 'upcoming'}
+        onValueChange={(v) => setPast(v === 'past')}
+      >
+        <TabsList>
+          <TabsTrigger value='upcoming'>Mendatang</TabsTrigger>
+          <TabsTrigger value='past'>Riwayat</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {isLoading ? (
         <Skeleton className='h-40 w-full' />

@@ -10,6 +10,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableEmpty,
   TableHead,
   TableHeader,
   TableRow,
@@ -71,8 +72,10 @@ export default function TutorApplicationsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.data.map((app) => {
-              return (
+            {data?.data.length === 0 ? (
+              <TableEmpty colSpan={5}>Belum ada aplikasi siswa.</TableEmpty>
+            ) : (
+              data?.data.map((app) => (
                 <TableRow key={app.id}>
                   <TableCell>
                     <div>{app.student.user.name}</div>
@@ -117,8 +120,8 @@ export default function TutorApplicationsPage() {
                     ) : null}
                   </TableCell>
                 </TableRow>
-              );
-            })}
+              ))
+            )}
           </TableBody>
         </Table>
       )}

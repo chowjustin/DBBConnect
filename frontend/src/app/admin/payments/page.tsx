@@ -10,6 +10,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableEmpty,
   TableHead,
   TableHeader,
   TableRow,
@@ -17,6 +18,7 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/status-badge';
 import { PageHeader } from '@/components/ui/page-header';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ImageLightbox } from '@/components/ui/image-lightbox';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatDateTimeId, formatRupiah } from '@/lib/format';
@@ -30,18 +32,20 @@ import { useConfirmPayment, useRejectPayment } from './hooks/mutation';
 
 export default function AdminPaymentsPage() {
   const { params } = usePagination();
+  const [history, setHistory] = React.useState(false);
   const confirm = useConfirmPayment();
   const reject = useRejectPayment();
   const [confirmTarget, setConfirmTarget] = React.useState<string | null>(null);
   const [rejectTarget, setRejectTarget] = React.useState<string | null>(null);
 
+  const endpoint = history ? '/admin/payments/history' : '/admin/payments';
   const { data, isLoading } = useQuery<{
     data: PaymentItem[];
     meta: PaginatedApiResponse<PaymentItem[]>['meta'];
   }>({
-    queryKey: ['/admin/payments', params],
+    queryKey: [endpoint, params],
     queryFn: async () => {
-      const res = await api.get('/admin/payments', { params });
+      const res = await api.get(endpoint, { params });
       return res.data;
     },
   });
@@ -52,9 +56,22 @@ export default function AdminPaymentsPage() {
     <div className='space-y-6'>
       <PageHeader
         icon={CreditCard}
-        title='Antrian Pembayaran'
-        description='Verifikasi bukti pembayaran dari siswa.'
+        title={history ? 'Riwayat Pembayaran' : 'Antrian Pembayaran'}
+        description={
+          history
+            ? 'Pembayaran yang sudah dikonfirmasi atau ditolak.'
+            : 'Verifikasi bukti pembayaran dari siswa.'
+        }
       />
+      <Tabs
+        value={history ? 'history' : 'queue'}
+        onValueChange={(v) => setHistory(v === 'history')}
+      >
+        <TabsList>
+          <TabsTrigger value='queue'>Antrian</TabsTrigger>
+          <TabsTrigger value='history'>Riwayat</TabsTrigger>
+        </TabsList>
+      </Tabs>
       {isLoading ? (
         <Skeleton className='h-40 w-full' />
       ) : (
@@ -70,8 +87,14 @@ export default function AdminPaymentsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.data.map((p) => {
-              return (
+            {data?.data.length === 0 ? (
+              <TableEmpty colSpan={6}>
+                {history
+                  ? 'Belum ada riwayat pembayaran.'
+                  : 'Antrian pembayaran kosong.'}
+              </TableEmpty>
+            ) : (
+              data?.data.map((p) => (
                 <TableRow key={p.id}>
                   <TableCell>{formatDateTimeId(p.createdAt)}</TableCell>
                   <TableCell>{paymentKindLabel(p.kind)}</TableCell>
@@ -116,8 +139,8 @@ export default function AdminPaymentsPage() {
                     ) : null}
                   </TableCell>
                 </TableRow>
-              );
-            })}
+              ))
+            )}
           </TableBody>
         </Table>
       )}

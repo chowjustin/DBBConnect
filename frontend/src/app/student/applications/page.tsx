@@ -7,6 +7,7 @@ import {
   Table,
   TableBody,
   TableCell,
+  TableEmpty,
   TableHead,
   TableHeader,
   TableRow,
@@ -55,18 +56,22 @@ export default function StudentApplicationsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.data.map((app) => (
-              <TableRow key={app.id}>
-                <TableCell>{app.tutor.user.name}</TableCell>
-                <TableCell>
-                  <StatusBadge kind='application' status={app.status} />
-                </TableCell>
-                <TableCell className='max-w-xs truncate'>
-                  {app.message ?? '—'}
-                </TableCell>
-                <TableCell>{formatDateId(app.createdAt)}</TableCell>
-              </TableRow>
-            ))}
+            {data?.data.length === 0 ? (
+              <TableEmpty colSpan={4}>Belum ada aplikasi.</TableEmpty>
+            ) : (
+              data?.data.map((app) => (
+                <TableRow key={app.id}>
+                  <TableCell>{app.tutor.user.name}</TableCell>
+                  <TableCell>
+                    <StatusBadge kind='application' status={app.status} />
+                  </TableCell>
+                  <TableCell className='max-w-xs truncate'>
+                    {app.message ?? '—'}
+                  </TableCell>
+                  <TableCell>{formatDateId(app.createdAt)}</TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       )}

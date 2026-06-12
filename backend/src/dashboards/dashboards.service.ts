@@ -2,8 +2,10 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import {
   ApplicationStatus,
   PaymentStatus,
+  PayoutStatus,
   PlanTier,
   SessionStatus,
+  VerificationStatus,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
@@ -241,6 +243,15 @@ export class DashboardsService {
       paid,
       tutorSupply,
       topTutors,
+      verificationsPending,
+      verificationsDone,
+      verificationsTotal,
+      paymentsPending,
+      paymentsDone,
+      paymentsTotal,
+      payoutsPending,
+      payoutsDone,
+      payoutsTotal,
     ] = await Promise.all([
       this.prisma.userActivity.count({ where: { lastSeenAt: { gte: since24h } } }),
       this.prisma.userActivity.count({ where: { lastSeenAt: { gte: since30 } } }),
@@ -268,6 +279,41 @@ export class DashboardsService {
         orderBy: { _count: { id: 'desc' } },
         take: 10,
       }),
+      this.prisma.tutorProfile.count({
+        where: { verificationStatus: VerificationStatus.PENDING },
+      }),
+      this.prisma.tutorProfile.count({
+        where: {
+          verificationStatus: {
+            in: [VerificationStatus.VERIFIED, VerificationStatus.REJECTED],
+          },
+        },
+      }),
+      this.prisma.tutorProfile.count(),
+      this.prisma.payment.count({
+        where: { status: PaymentStatus.UNDER_REVIEW },
+      }),
+      this.prisma.payment.count({
+        where: {
+          status: {
+            in: [
+              PaymentStatus.CONFIRMED,
+              PaymentStatus.REJECTED,
+              PaymentStatus.REFUNDED,
+            ],
+          },
+        },
+      }),
+      this.prisma.payment.count(),
+      this.prisma.payout.count({
+        where: { status: PayoutStatus.REQUESTED },
+      }),
+      this.prisma.payout.count({
+        where: {
+          status: { in: [PayoutStatus.PAID, PayoutStatus.REJECTED] },
+        },
+      }),
+      this.prisma.payout.count(),
     ]);
 
     const gmvAmount = gmv._sum.grossAmount ?? 0;
@@ -282,6 +328,23 @@ export class DashboardsService {
       funnel: { registered, applied, accepted, booked, paid },
       tutorSupply,
       topTutors,
+      queues: {
+        verifications: {
+          pending: verificationsPending,
+          done: verificationsDone,
+          total: verificationsTotal,
+        },
+        payments: {
+          pending: paymentsPending,
+          done: paymentsDone,
+          total: paymentsTotal,
+        },
+        payouts: {
+          pending: payoutsPending,
+          done: payoutsDone,
+          total: payoutsTotal,
+        },
+      },
     };
   }
 }

@@ -12,7 +12,15 @@ export interface SessionItem {
   meetingUrl: string | null;
   location: string | null;
   tutor?: { user: { name: string } };
-  attendees?: Array<{ id: string; studentId: string; paymentId: string | null }>;
+  attendees?: Array<{
+    id: string;
+    studentId: string;
+    paymentId: string | null;
+    payment: {
+      id: string;
+      status: 'UNDER_REVIEW' | 'CONFIRMED' | 'REJECTED' | 'REFUNDED';
+    } | null;
+  }>;
 }
 
 export interface BookSessionForm {

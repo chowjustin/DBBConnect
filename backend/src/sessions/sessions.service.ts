@@ -210,7 +210,8 @@ export class SessionsService {
       include: { studentProfile: true },
     });
     if (!user?.studentProfile) return paginated([], 0);
-    return paginatePrisma(this.prisma.session, pagination, {
+
+    const result = await paginatePrisma<any>(this.prisma.session, pagination, {
       where: {
         attendees: { some: { studentId: user.studentProfile.id } },
         startsAt: past ? { lt: new Date() } : { gte: new Date() },
@@ -218,6 +219,32 @@ export class SessionsService {
       include: { tutor: { include: { user: true } }, attendees: true },
       orderBy: { startsAt: past ? 'desc' : 'asc' },
     });
+
+    const attendeeIds = result.data.flatMap((s: any) =>
+      s.attendees.map((a: any) => a.id),
+    );
+    const payments = attendeeIds.length
+      ? await this.prisma.payment.findMany({
+          where: { sessionAttendeeId: { in: attendeeIds } },
+          select: { id: true, sessionAttendeeId: true, status: true },
+        })
+      : [];
+    const byAttendee = new Map(payments.map((p) => [p.sessionAttendeeId, p]));
+
+    result.data = result.data.map((s: any) => ({
+      ...s,
+      attendees: s.attendees.map((a: any) => ({
+        ...a,
+        payment: byAttendee.get(a.id)
+          ? {
+              id: byAttendee.get(a.id)!.id,
+              status: byAttendee.get(a.id)!.status,
+            }
+          : null,
+      })),
+    }));
+
+    return result;
   }
 
   async listForTutor(

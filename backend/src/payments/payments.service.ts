@@ -244,6 +244,21 @@ export class PaymentsService {
     });
   }
 
+  listHistory(pagination: PaginationQueryDto) {
+    return paginatePrisma(this.prisma.payment, pagination, {
+      where: {
+        status: {
+          in: [
+            PaymentStatus.CONFIRMED,
+            PaymentStatus.REJECTED,
+            PaymentStatus.REFUNDED,
+          ],
+        },
+      },
+      orderBy: { reviewedAt: 'desc' },
+    });
+  }
+
   listMine(payerId: string, pagination: PaginationQueryDto) {
     return paginatePrisma(this.prisma.payment, pagination, {
       where: { payerId },

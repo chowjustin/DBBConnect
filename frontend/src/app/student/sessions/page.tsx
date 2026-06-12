@@ -27,6 +27,7 @@ import type { PaginatedApiResponse } from '@/types/api';
 
 import { CalendarDays, Star, Wallet } from 'lucide-react';
 import { PageHeader } from '@/components/ui/page-header';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState } from '@/components/ui/empty-state';
 import { ReviewDialog } from './components/review-dialog';
 
@@ -84,16 +85,16 @@ export default function StudentSessionsPage() {
         icon={CalendarDays}
         title='Sesi Saya'
         description={past ? 'Riwayat sesi belajar.' : 'Sesi mendatang.'}
-        actions={
-          <Button
-            variant='outline'
-            size='sm'
-            onClick={() => setPast((p) => !p)}
-          >
-            {past ? 'Mendatang' : 'Riwayat'}
-          </Button>
-        }
       />
+      <Tabs
+        value={past ? 'past' : 'upcoming'}
+        onValueChange={(v) => setPast(v === 'past')}
+      >
+        <TabsList>
+          <TabsTrigger value='upcoming'>Mendatang</TabsTrigger>
+          <TabsTrigger value='past'>Riwayat</TabsTrigger>
+        </TabsList>
+      </Tabs>
 
       {isLoading ? (
         <Skeleton className='h-40 w-full' />
@@ -124,7 +125,11 @@ export default function StudentSessionsPage() {
               const myAttendee = s.attendees?.find(
                 (a) => a.studentId === studentProfileId,
               );
-              const unpaid = myAttendee && !myAttendee.paymentId;
+              const paymentStatus = myAttendee?.payment?.status;
+              const canPay =
+                !!myAttendee &&
+                !myAttendee.paymentId &&
+                (!paymentStatus || paymentStatus === 'REJECTED');
               return (
                 <TableRow key={s.id}>
                   <TableCell>{s.tutor?.user.name ?? '—'}</TableCell>
@@ -134,21 +139,10 @@ export default function StudentSessionsPage() {
                     <div className='flex items-center gap-2'>
                       <StatusBadge kind='session' status={s.status} />
                       {myAttendee ? (
-                        unpaid ? (
-                          <Badge
-                            variant='secondary'
-                            className='border border-amber-200 bg-amber-50 text-amber-700'
-                          >
-                            Belum Bayar
-                          </Badge>
-                        ) : (
-                          <Badge
-                            variant='secondary'
-                            className='border border-emerald-200 bg-emerald-50 text-emerald-700'
-                          >
-                            Lunas
-                          </Badge>
-                        )
+                        <PaymentBadge
+                          paymentStatus={paymentStatus}
+                          paid={!!myAttendee.paymentId}
+                        />
                       ) : null}
                     </div>
                   </TableCell>
@@ -157,7 +151,7 @@ export default function StudentSessionsPage() {
                   </TableCell>
                   <TableCell>
                     <div className='flex gap-2'>
-                      {unpaid && myAttendee ? (
+                      {canPay && myAttendee ? (
                         <Button
                           size='sm'
                           onClick={() =>
@@ -168,7 +162,10 @@ export default function StudentSessionsPage() {
                             })
                           }
                         >
-                          <Wallet className='size-3.5' /> Bayar
+                          <Wallet className='size-3.5' />{' '}
+                          {paymentStatus === 'REJECTED'
+                            ? 'Bayar Ulang'
+                            : 'Bayar'}
                         </Button>
                       ) : null}
                       <Button
@@ -227,5 +224,62 @@ export default function StudentSessionsPage() {
         })}
       />
     </div>
+  );
+}
+
+function PaymentBadge({
+  paymentStatus,
+  paid,
+}: {
+  paymentStatus?: 'UNDER_REVIEW' | 'CONFIRMED' | 'REJECTED' | 'REFUNDED';
+  paid: boolean;
+}) {
+  if (paid || paymentStatus === 'CONFIRMED') {
+    return (
+      <Badge
+        variant='secondary'
+        className='border border-emerald-200 bg-emerald-50 text-emerald-700'
+      >
+        Lunas
+      </Badge>
+    );
+  }
+  if (paymentStatus === 'UNDER_REVIEW') {
+    return (
+      <Badge
+        variant='secondary'
+        className='border-primary-200 bg-primary-50 text-primary-800 border'
+      >
+        Menunggu Konfirmasi
+      </Badge>
+    );
+  }
+  if (paymentStatus === 'REJECTED') {
+    return (
+      <Badge
+        variant='secondary'
+        className='border border-rose-200 bg-rose-50 text-rose-700'
+      >
+        Pembayaran Ditolak
+      </Badge>
+    );
+  }
+  if (paymentStatus === 'REFUNDED') {
+    return (
+      <Badge
+        variant='secondary'
+        className='border border-slate-200 bg-slate-50 text-slate-700'
+      >
+        Refund
+      </Badge>
+    );
+  }
+  return (
+    <Badge
+      variant='secondary'
+      className='border border-amber-200 bg-amber-50 text-amber-700'
+    >
+      Belum Bayar
+    </Badge>
   );
 }

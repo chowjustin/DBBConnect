@@ -62,6 +62,12 @@ export class AdminPayoutsController {
   }
 
   @Roles(UserRole.ADMIN)
+  @Get('history')
+  history(@Query() pagination: PaginationQueryDto) {
+    return this.svc.listHistory(pagination);
+  }
+
+  @Roles(UserRole.ADMIN)
   @Post(':id/mark-paid')
   async markPaid(
     @Request() req,

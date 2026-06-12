@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button';
 import {
   Table,
   TableBody,
+  TableEmpty,
   TableCell,
   TableHead,
   TableHeader,
@@ -49,7 +50,9 @@ export default function StudentMaterialsPage() {
 
   const download = async (id: string, fileName: string | null) => {
     const token = getToken();
-    await api.post(`/tracking/material-view`, { materialId: id }).catch(() => {});
+    await api
+      .post(`/tracking/material-view`, { materialId: id })
+      .catch(() => {});
     const res = await fetch(`${apiUrl}/api/upload/material/${id}`, {
       headers: token ? { Authorization: `Bearer ${token}` } : {},
     });
@@ -78,21 +81,25 @@ export default function StudentMaterialsPage() {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {data?.data.map((m) => (
-              <TableRow key={m.id}>
-                <TableCell>{formatDateId(m.createdAt)}</TableCell>
-                <TableCell>{m.tutor?.user.name ?? '—'}</TableCell>
-                <TableCell>{m.fileName ?? m.title ?? '—'}</TableCell>
-                <TableCell>
-                  <Button
-                    size='sm'
-                    onClick={() => download(m.id, m.fileName)}
-                  >
-                    Unduh
-                  </Button>
-                </TableCell>
-              </TableRow>
-            ))}
+            {data?.data.length === 0 ? (
+              <TableEmpty colSpan={4}>Belum ada materi.</TableEmpty>
+            ) : (
+              data?.data.map((m) => (
+                <TableRow key={m.id}>
+                  <TableCell>{formatDateId(m.createdAt)}</TableCell>
+                  <TableCell>{m.tutor?.user.name ?? '—'}</TableCell>
+                  <TableCell>{m.fileName ?? m.title ?? '—'}</TableCell>
+                  <TableCell>
+                    <Button
+                      size='sm'
+                      onClick={() => download(m.id, m.fileName)}
+                    >
+                      Unduh
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
           </TableBody>
         </Table>
       )}

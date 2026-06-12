@@ -438,6 +438,7 @@ model PromoCode {
   currentUses     Int           @default(0)
   applicableKinds PaymentKind[]
   minAmount       Int?
+  active          Boolean       @default(true)
   createdBy       String
   createdAt       DateTime      @default(now())
 }

@@ -104,6 +104,30 @@ function TableCaption({
   );
 }
 
+function TableEmpty({
+  colSpan,
+  children = 'Tidak ada data.',
+  className,
+}: {
+  colSpan: number;
+  children?: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <TableRow>
+      <TableCell
+        colSpan={colSpan}
+        className={cn(
+          'text-muted-foreground py-10 text-center text-sm',
+          className,
+        )}
+      >
+        {children}
+      </TableCell>
+    </TableRow>
+  );
+}
+
 export {
   Table,
   TableHeader,
@@ -113,4 +137,5 @@ export {
   TableRow,
   TableCell,
   TableCaption,
+  TableEmpty,
 };

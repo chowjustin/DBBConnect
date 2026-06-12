@@ -6,8 +6,15 @@ import { formatRupiah } from '@/lib/format';
 import { subjectLabel } from '@/constant/enums';
 
 import type { TutorSearchItem } from '../types';
+import type { ApplicationStatus } from '../hooks/use-my-applications';
 
-export function TutorCard({ tutor }: { tutor: TutorSearchItem }) {
+export function TutorCard({
+  tutor,
+  applicationStatus,
+}: {
+  tutor: TutorSearchItem;
+  applicationStatus?: ApplicationStatus;
+}) {
   const initials = tutor.user.name
     .split(' ')
     .map((p) => p[0])
@@ -20,11 +27,24 @@ export function TutorCard({ tutor }: { tutor: TutorSearchItem }) {
       href={`/student/tutors/${tutor.id}`}
       className='group border-primary-100 hover:border-primary-300 hover:shadow-primary-500/5 focus-visible:ring-primary-400 relative block overflow-hidden rounded-xl border bg-white p-5 transition-all hover:shadow-md focus-visible:ring-2 focus-visible:outline-none'
     >
-      {tutor.featured ? (
-        <span className='bg-secondary-100 text-secondary-800 border-secondary-200 absolute top-3 right-3 rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase'>
-          Featured
-        </span>
-      ) : null}
+      <div className='absolute top-3 right-3 flex flex-wrap items-center justify-end gap-1.5'>
+        {applicationStatus ? (
+          <span
+            className={`rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase ${
+              applicationStatus === 'ACCEPTED'
+                ? 'border-emerald-200 bg-emerald-50 text-emerald-700'
+                : 'border-primary-200 bg-primary-50 text-primary-800'
+            }`}
+          >
+            {applicationStatus === 'ACCEPTED' ? 'Diterima' : 'Sudah diajukan'}
+          </span>
+        ) : null}
+        {tutor.featured ? (
+          <span className='bg-secondary-100 text-secondary-800 border-secondary-200 rounded-full border px-2 py-0.5 text-[10px] font-medium tracking-wide uppercase'>
+            Featured
+          </span>
+        ) : null}
+      </div>
 
       <div className='flex gap-4'>
         <Avatar className='ring-primary-100 size-16 shrink-0 ring-2'>

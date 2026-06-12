@@ -181,6 +181,18 @@ export class TutorsService {
     });
   }
 
+  async listVerificationHistory(pagination: PaginationQueryDto) {
+    return paginatePrisma(this.prisma.tutorProfile, pagination, {
+      where: {
+        verificationStatus: {
+          in: [VerificationStatus.VERIFIED, VerificationStatus.REJECTED],
+        },
+      },
+      include: { user: { select: { id: true, name: true, email: true } } },
+      orderBy: { updatedAt: 'desc' },
+    });
+  }
+
   async reviewVerification(
     tutorProfileId: string,
     status: VerificationStatus,

@@ -3,6 +3,7 @@ import {
   ConflictException,
   ForbiddenException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,10 +14,13 @@ import { paginatePrisma } from '../common/paginate';
 
 @Injectable()
 export class ApplicationsService {
+  private readonly logger = new Logger(ApplicationsService.name);
+
   constructor(
     private prisma: PrismaService,
     private mailService: MailService,
   ) {}
+
 
   async apply(studentEmail: string, tutorId: string, message?: string) {
     const student = await this.prisma.user.findUnique({
@@ -67,14 +71,16 @@ export class ApplicationsService {
         },
       });
 
-      await this.mailService.sendStudentPendingEmail(
-        student.email,
-        tutor.user.name,
-      );
-      await this.mailService.sendTutorNewApplicationEmail(
-        tutor.user.email,
-        student.name,
-      );
+      this.mailService
+        .sendStudentPendingEmail(student.email, tutor.user.name)
+        .catch((err) =>
+          this.logger.error('sendStudentPendingEmail failed', err),
+        );
+      this.mailService
+        .sendTutorNewApplicationEmail(tutor.user.email, student.name)
+        .catch((err) =>
+          this.logger.error('sendTutorNewApplicationEmail failed', err),
+        );
 
       return newApp;
     } catch (error) {
@@ -181,11 +187,15 @@ export class ApplicationsService {
       return u;
     });
 
-    await this.mailService.sendStudentStatusUpdateEmail(
-      app.student.user.email,
-      status,
-      app.tutor.user.name,
-    );
+    this.mailService
+      .sendStudentStatusUpdateEmail(
+        app.student.user.email,
+        status,
+        app.tutor.user.name,
+      )
+      .catch((err) =>
+        this.logger.error('sendStudentStatusUpdateEmail failed', err),
+      );
 
     return updated;
   }

@@ -9,6 +9,7 @@ interface KpiCardProps {
   label: string;
   value: string;
   unit?: string;
+  sublabel?: React.ReactNode;
   trend?: number;
   loading?: boolean;
   accent?: 'primary' | 'emerald' | 'amber' | 'sky' | 'rose';
@@ -43,6 +44,7 @@ export function KpiCard({
   label,
   value,
   unit,
+  sublabel,
   trend,
   loading,
   accent = 'primary',
@@ -52,7 +54,7 @@ export function KpiCard({
   return (
     <Card
       className={cn(
-        'group hover:shadow-md hover:shadow-primary-500/5 hover:-translate-y-0.5 transition-all',
+        'group hover:shadow-primary-500/5 transition-all hover:-translate-y-0.5 hover:shadow-md',
         className,
       )}
     >
@@ -87,10 +89,10 @@ export function KpiCard({
           ) : null}
         </div>
         <div>
-          <div className='text-muted-foreground text-xs font-medium uppercase tracking-wide'>
+          <div className='text-muted-foreground text-xs font-medium tracking-wide uppercase'>
             {label}
           </div>
-          <div className='mono mt-1 text-2xl font-bold text-primary-900'>
+          <div className='mono text-primary-900 mt-1 text-2xl font-bold'>
             {loading ? <span className='opacity-40'>—</span> : value}
             {unit ? (
               <span className='text-muted-foreground ml-1 text-sm font-normal'>
@@ -98,6 +100,11 @@ export function KpiCard({
               </span>
             ) : null}
           </div>
+          {sublabel ? (
+            <div className='text-muted-foreground mono mt-1 text-[11px] tabular-nums'>
+              {sublabel}
+            </div>
+          ) : null}
         </div>
       </CardContent>
     </Card>

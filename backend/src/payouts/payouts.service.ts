@@ -115,6 +115,16 @@ export class PayoutsService {
     });
   }
 
+  listHistory(pagination: PaginationQueryDto) {
+    return paginatePrisma(this.prisma.payout, pagination, {
+      where: {
+        status: { in: [PayoutStatus.PAID, PayoutStatus.REJECTED] },
+      },
+      include: { tutor: { include: { user: true } } },
+      orderBy: { paidAt: 'desc' },
+    });
+  }
+
   async markPaid(adminId: string, payoutId: string, proofUrl: string) {
     const payout = await this.prisma.payout.findUnique({
       where: { id: payoutId },
