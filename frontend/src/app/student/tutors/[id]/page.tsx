@@ -1,25 +1,24 @@
 'use client';
 
-import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { useParams } from 'next/navigation';
 import { GraduationCap, Star } from 'lucide-react';
+import { useParams } from 'next/navigation';
+import * as React from 'react';
 
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
+import { PageHeader } from '@/components/ui/page-header';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   educationLevelLabels,
   subjectLabels,
   teachingMethodLabels,
 } from '@/constant/enums';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Skeleton } from '@/components/ui/skeleton';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { PageHeader } from '@/components/ui/page-header';
 import { formatRupiah } from '@/lib/format';
 
 import { useActiveApplicationByTutor } from '../hooks/use-my-applications';
-
 import { ApplyDialog } from './components/apply-dialog';
 
 interface TutorDetail {

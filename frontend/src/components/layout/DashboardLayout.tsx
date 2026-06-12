@@ -1,10 +1,22 @@
 'use client';
 
-import * as React from 'react';
+import { LogOut } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { GraduationCap, LogOut } from 'lucide-react';
+import * as React from 'react';
 
+import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import { Separator } from '@/components/ui/separator';
 import {
   Sidebar,
   SidebarContent,
@@ -20,21 +32,11 @@ import {
   SidebarRail,
   SidebarTrigger,
 } from '@/components/ui/sidebar';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { clearTokens } from '@/lib/cookie';
 import useAuthStore from '@/store/use-auth-store';
-import { SIDEBAR_ENTRIES } from './sidebar-entries';
 import type { Role, User } from '@/types/shared';
+
+import { SIDEBAR_ENTRIES } from './sidebar-entries';
 
 interface DashboardLayoutProps {
   role: Role;
@@ -73,7 +75,12 @@ export function DashboardLayout({
             href={entries[0]?.href ?? '/'}
             className='flex items-center gap-2 px-2 py-1.5'
           >
-            <GraduationCap className='text-primary size-5 shrink-0' />
+            <Image
+              src='/logo-tutorconnect.png'
+              alt='TutorConnect Logo'
+              width={32}
+              height={32}
+            />
             <span className='truncate text-sm font-bold group-data-[collapsible=icon]:hidden'>
               TutorConnect
             </span>

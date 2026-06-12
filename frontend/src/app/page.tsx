@@ -1,22 +1,21 @@
 'use client';
 
-import * as React from 'react';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
 import {
   ArrowRight,
   ArrowUpRight,
   CalendarCheck,
   CheckCircle2,
-  GraduationCap,
   PiggyBank,
   Search,
   ShieldCheck,
   Sparkles,
   Star,
 } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import * as React from 'react';
 
-import { Button } from '@/components/ui/button';
 import {
   Accordion,
   AccordionContent,
@@ -24,6 +23,7 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Button } from '@/components/ui/button';
 
 export default function LandingPage() {
   return (
@@ -58,7 +58,12 @@ function Header() {
           href='/'
           className='inline-flex items-center gap-2 text-base font-semibold'
         >
-          <GraduationCap className='text-primary-600 size-5' />
+          <Image
+            src='/logo-tutorconnect.png'
+            alt='TutorConnect Logo'
+            width={32}
+            height={32}
+          />
           TutorConnect
         </Link>
         <nav
@@ -976,7 +981,12 @@ function Footer() {
             href='/'
             className='inline-flex items-center gap-2 text-base font-semibold'
           >
-            <GraduationCap className='text-primary-600 size-5' />
+            <Image
+              src='/logo-tutorconnect.png'
+              alt='TutorConnect Logo'
+              width={32}
+              height={32}
+            />
             TutorConnect
           </Link>
           <p className='text-muted-foreground text-sm leading-relaxed'>

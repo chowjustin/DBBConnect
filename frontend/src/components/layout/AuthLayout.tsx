@@ -1,12 +1,7 @@
-import * as React from 'react';
+import { CheckCircle2, PiggyBank, ShieldCheck, Sparkles } from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
-import {
-  CheckCircle2,
-  GraduationCap,
-  PiggyBank,
-  ShieldCheck,
-  Sparkles,
-} from 'lucide-react';
+import * as React from 'react';
 
 const TRUST_POINTS = [
   {
@@ -64,7 +59,12 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
           href='/'
           className='text-foreground relative inline-flex items-center gap-2 text-base font-semibold'
         >
-          <GraduationCap className='text-primary-600 size-5' />
+          <Image
+            src='/logo-tutorconnect.png'
+            alt='TutorConnect Logo'
+            width={32}
+            height={32}
+          />
           TutorConnect
         </Link>
 
@@ -110,7 +110,12 @@ export function AuthLayout({ children }: { children: React.ReactNode }) {
             href='/'
             className='inline-flex items-center gap-2 text-base font-semibold'
           >
-            <GraduationCap className='text-primary-600 size-5' />
+            <Image
+              src='/logo-tutorconnect.png'
+              alt='TutorConnect Logo'
+              width={32}
+              height={32}
+            />
             TutorConnect
           </Link>
         </div>
