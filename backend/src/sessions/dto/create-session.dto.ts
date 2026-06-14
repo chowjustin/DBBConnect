@@ -3,10 +3,8 @@ import {
   IsArray,
   IsDateString,
   IsEnum,
-  IsInt,
   IsOptional,
   IsString,
-  Min,
 } from 'class-validator';
 import {
   ClassFormat,
@@ -35,10 +33,6 @@ export class CreateSessionDto {
   @ArrayMinSize(1)
   @IsString({ each: true })
   attendeeStudentIds: string[];
-
-  @IsInt()
-  @Min(0)
-  pricePerSeat: number;
 
   @IsOptional()
   @IsString()

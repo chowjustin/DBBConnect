@@ -8,8 +8,11 @@ import {
 import {
   ApplicationStatus,
   ClassFormat,
+  PaymentKind,
+  PaymentStatus,
   Prisma,
   SessionStatus,
+  UserRole,
 } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 import { MailService } from '../mail/mail.service';
@@ -138,6 +141,13 @@ export class SessionsService {
     });
     if (studentOverlap) throw new ConflictException('Attendee already booked');
 
+    // Server-computed price: hourly rate × duration (in hours, rounded up to nearest 15 min block).
+    // Client-sent pricePerSeat is ignored (per money-trust policy).
+    const hourlyRate = tutor.hourlyRate ?? 0;
+    const durationMs = end.getTime() - start.getTime();
+    const durationHours = durationMs / (60 * 60 * 1000);
+    const computedPricePerSeat = Math.round(hourlyRate * durationHours);
+
     return this.prisma.$transaction(async (tx) => {
       const session = await tx.session.create({
         data: {
@@ -148,7 +158,7 @@ export class SessionsService {
           mode: dto.mode,
           subjects: dto.subjects,
           level: dto.level,
-          pricePerSeat: dto.pricePerSeat,
+          pricePerSeat: computedPricePerSeat,
           meetingUrl: dto.meetingUrl,
           location: dto.location,
           notes: dto.notes,
@@ -295,6 +305,172 @@ export class SessionsService {
     }));
 
     return result;
+  }
+
+  async cancel(
+    userId: string,
+    userRole: UserRole,
+    sessionId: string,
+    reason?: string,
+  ) {
+    const session = await this.prisma.session.findUnique({
+      where: { id: sessionId },
+      include: {
+        tutor: { include: { user: true } },
+        attendees: {
+          include: {
+            student: { include: { user: true } },
+            payment: true,
+          },
+        },
+      },
+    });
+    if (!session) throw new NotFoundException('Session not found');
+    if (session.status !== SessionStatus.SCHEDULED) {
+      throw new BadRequestException('Session sudah tidak dapat dibatalkan');
+    }
+    if (session.startsAt.getTime() <= Date.now()) {
+      throw new BadRequestException('Sesi sudah dimulai atau lewat');
+    }
+
+    // Authorize: tutor owner or any attendee.
+    const isTutorOwner =
+      userRole === UserRole.TUTOR && session.tutor.user.id === userId;
+    const isAttendee = session.attendees.some(
+      (a) => a.student.user.id === userId,
+    );
+    if (!isTutorOwner && !isAttendee) {
+      throw new ForbiddenException('Tidak diizinkan membatalkan sesi ini');
+    }
+
+    // Policy: cannot cancel once any attendee has a live payment (under review or confirmed).
+    // Must reschedule instead.
+    const hasLivePayment = session.attendees.some(
+      (a) =>
+        a.payment &&
+        a.payment.kind === PaymentKind.SESSION &&
+        (a.payment.status === PaymentStatus.UNDER_REVIEW ||
+          a.payment.status === PaymentStatus.CONFIRMED),
+    );
+    if (hasLivePayment) {
+      throw new BadRequestException(
+        'Sesi yang sudah dibayar tidak dapat dibatalkan. Gunakan jadwal ulang.',
+      );
+    }
+
+    return this.prisma.session.update({
+      where: { id: sessionId },
+      data: {
+        status: SessionStatus.CANCELED,
+        canceledAt: new Date(),
+        canceledById: userId,
+        cancelReason: reason ?? null,
+      },
+      include: { attendees: true },
+    });
+  }
+
+  async reschedule(
+    userId: string,
+    userRole: UserRole,
+    sessionId: string,
+    newStartsAt: string,
+    newEndsAt: string,
+  ) {
+    const start = new Date(newStartsAt);
+    const end = new Date(newEndsAt);
+    if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+      throw new BadRequestException('Invalid startsAt or endsAt');
+    }
+    if (end <= start) {
+      throw new BadRequestException('endsAt must be after startsAt');
+    }
+    if ((end.getTime() - start.getTime()) / 1000 > 4 * 3600) {
+      throw new BadRequestException('Session too long (>4h)');
+    }
+    if (start.getTime() < Date.now() + 30 * 60 * 1000) {
+      throw new BadRequestException('Must reschedule at least 30 minutes ahead');
+    }
+
+    const session = await this.prisma.session.findUnique({
+      where: { id: sessionId },
+      include: {
+        tutor: { include: { user: true } },
+        attendees: { include: { student: { include: { user: true } } } },
+      },
+    });
+    if (!session) throw new NotFoundException('Session not found');
+    if (session.status !== SessionStatus.SCHEDULED) {
+      throw new BadRequestException('Hanya sesi terjadwal yang bisa diubah');
+    }
+
+    // Reschedule preserves duration (price is tied to it).
+    const originalDuration =
+      session.endsAt.getTime() - session.startsAt.getTime();
+    const newDuration = end.getTime() - start.getTime();
+    if (newDuration !== originalDuration) {
+      throw new BadRequestException(
+        'Durasi sesi harus sama dengan sebelumnya',
+      );
+    }
+
+    const isTutorOwner =
+      userRole === UserRole.TUTOR && session.tutor.user.id === userId;
+    const isAttendee = session.attendees.some(
+      (a) => a.student.user.id === userId,
+    );
+    if (!isTutorOwner && !isAttendee) {
+      throw new ForbiddenException('Tidak diizinkan menjadwalkan ulang');
+    }
+
+    const slots = await this.prisma.availabilitySlot.findMany({
+      where: { tutorId: session.tutorId },
+    });
+    if (!slots.some((s) => isInsideSlot({ start, end }, s))) {
+      throw new BadRequestException('Waktu di luar ketersediaan tutor');
+    }
+
+    const blackout = await this.prisma.blackoutDate.findFirst({
+      where: {
+        tutorId: session.tutorId,
+        startsAt: { lt: end },
+        endsAt: { gt: start },
+      },
+    });
+    if (blackout) throw new ConflictException('Tutor blackout period');
+
+    const tutorOverlap = await this.prisma.session.findFirst({
+      where: {
+        id: { not: sessionId },
+        tutorId: session.tutorId,
+        status: SessionStatus.SCHEDULED,
+        startsAt: { lt: end },
+        endsAt: { gt: start },
+      },
+    });
+    if (tutorOverlap) throw new ConflictException('Tutor sudah ada sesi lain');
+
+    const attendeeIds = session.attendees.map((a) => a.studentId);
+    const studentOverlap = await this.prisma.sessionAttendee.findFirst({
+      where: {
+        studentId: { in: attendeeIds },
+        session: {
+          id: { not: sessionId },
+          status: SessionStatus.SCHEDULED,
+          startsAt: { lt: end },
+          endsAt: { gt: start },
+        },
+      },
+    });
+    if (studentOverlap) {
+      throw new ConflictException('Peserta sudah ada sesi lain pada waktu itu');
+    }
+
+    return this.prisma.session.update({
+      where: { id: sessionId },
+      data: { startsAt: start, endsAt: end },
+      include: { attendees: true },
+    });
   }
 
   async ical(sessionId: string): Promise<string> {

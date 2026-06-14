@@ -77,8 +77,18 @@ export class PaymentsService {
       if (isNaN(days) || days <= 0) {
         throw new BadRequestException('Invalid days');
       }
+      const payer = await this.prisma.user.findUnique({
+        where: { id: payerId },
+        include: { tutorProfile: true },
+      });
+      if (!payer?.tutorProfile) {
+        throw new BadRequestException(
+          'Hanya tutor yang dapat membeli featured',
+        );
+      }
       grossAmount = days * parseInt(process.env.FEATURED_PRICE_PER_DAY || '5000', 10);
       featuredListingId = refId;
+      payeeTutorId = payer.tutorProfile.id;
     }
 
     // Promo (lookup, stack later)
@@ -104,9 +114,56 @@ export class PaymentsService {
       promoCodeId = code.id;
     }
 
+    // Premium Student auto 10% discount on first SESSION payment
+    if (kind === PaymentKind.SESSION) {
+      const payer = await this.prisma.user.findUnique({
+        where: { id: payerId },
+        include: { subscription: true },
+      });
+      const isPremium =
+        payer?.subscription?.tier === 'PREMIUM_STUDENT' &&
+        payer.subscription.expiresAt &&
+        payer.subscription.expiresAt > new Date();
+      if (isPremium) {
+        const prior = await this.prisma.payment.count({
+          where: {
+            payerId,
+            kind: PaymentKind.SESSION,
+            status: PaymentStatus.CONFIRMED,
+          },
+        });
+        if (prior === 0) {
+          const premiumDiscount = Math.floor(grossAmount * 0.1);
+          discountAmount += premiumDiscount;
+        }
+      }
+    }
+
     const netGross = Math.max(0, grossAmount - discountAmount);
-    const commission = Math.floor((netGross * COMMISSION_PCT) / 100);
-    const netAmount = netGross - commission;
+
+    // Commission applies only to SESSION payments (split between tutor + platform).
+    // FEATURED_LISTING and SUBSCRIPTION go fully to the platform — no commission split.
+    let commission = 0;
+    let netAmount = 0;
+    if (kind === PaymentKind.SESSION) {
+      let commissionPct = COMMISSION_PCT;
+      if (payeeTutorId) {
+        const tutorProfile = await this.prisma.tutorProfile.findUnique({
+          where: { id: payeeTutorId },
+          select: { user: { select: { subscription: true } } },
+        });
+        const sub = tutorProfile?.user.subscription;
+        const isPro =
+          sub?.tier === 'PRO_TUTOR' &&
+          sub.expiresAt &&
+          sub.expiresAt > new Date();
+        if (isPro) {
+          commissionPct = Math.max(0, COMMISSION_PCT - 5);
+        }
+      }
+      commission = Math.floor((netGross * commissionPct) / 100);
+      netAmount = netGross - commission;
+    }
 
     const banks = await this.platformBank.listActive();
     const receivedToBank = this.snapshotBank(banks);

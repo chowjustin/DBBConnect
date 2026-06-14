@@ -139,7 +139,7 @@ export default function BookSessionPage() {
     queryKey: ['/applications/student', { per_page: 50 }],
     queryFn: async () => {
       const res = await api.get('/applications/student', {
-        params: { per_page: 50 },
+        params: { per_page: 50, status: 'ACCEPTED' },
       });
       return res.data;
     },
@@ -147,7 +147,6 @@ export default function BookSessionPage() {
 
   const acceptedTutors =
     apps.data?.data
-      .filter((a) => a.status === 'ACCEPTED')
       .map((a) => a.tutor)
       .filter((v, i, arr) => arr.findIndex((x) => x.id === v.id) === i) ?? [];
 
@@ -174,7 +173,6 @@ export default function BookSessionPage() {
           level: v.level,
           startsAt,
           endsAt,
-          pricePerSeat: selectedTutor.hourlyRate ?? 0,
           attendeeStudentIds: [studentProfileId],
         },
         withIdempotency(),
@@ -423,11 +421,32 @@ export default function BookSessionPage() {
                   <div className='text-muted-foreground text-xs font-semibold tracking-wide uppercase'>
                     Total
                   </div>
-                  <div className='mono text-primary-900 text-2xl font-bold'>
-                    {selectedTutor?.hourlyRate
-                      ? formatRupiah(selectedTutor.hourlyRate)
-                      : '—'}
-                  </div>
+                  {(() => {
+                    const rate = selectedTutor?.hourlyRate ?? 0;
+                    let hours = 0;
+                    if (values.date && values.startTime && values.endTime) {
+                      const s = new Date(
+                        `${values.date}T${values.startTime}:00`,
+                      ).getTime();
+                      const e = new Date(
+                        `${values.date}T${values.endTime}:00`,
+                      ).getTime();
+                      if (e > s) hours = (e - s) / 3_600_000;
+                    }
+                    const total = Math.round(rate * hours);
+                    return (
+                      <>
+                        <div className='mono text-primary-900 text-2xl font-bold'>
+                          {total > 0 ? formatRupiah(total) : '—'}
+                        </div>
+                        {hours > 0 ? (
+                          <div className='text-muted-foreground mt-1 text-xs'>
+                            {formatRupiah(rate)} × {hours} jam
+                          </div>
+                        ) : null}
+                      </>
+                    );
+                  })()}
                 </div>
               </CardContent>
             </Card>

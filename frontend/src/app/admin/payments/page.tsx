@@ -99,7 +99,7 @@ export default function AdminPaymentsPage() {
                   <TableCell>{formatDateTimeId(p.createdAt)}</TableCell>
                   <TableCell>{paymentKindLabel(p.kind)}</TableCell>
                   <TableCell className='mono'>
-                    {formatRupiah(p.netAmount)}
+                    {formatRupiah(p.grossAmount)}
                   </TableCell>
                   <TableCell>
                     <StatusBadge kind='payment' status={p.status} />

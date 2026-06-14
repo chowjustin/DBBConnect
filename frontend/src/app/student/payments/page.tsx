@@ -113,7 +113,7 @@ export default function StudentPaymentsPage() {
                     </TableCell>
                     <TableCell>{paymentKindLabel(p.kind)}</TableCell>
                     <TableCell className='mono text-right tabular-nums'>
-                      {formatRupiah(p.netAmount)}
+                      {formatRupiah(p.grossAmount)}
                     </TableCell>
                     <TableCell>
                       <StatusBadge kind='payment' status={p.status} />
