@@ -19,7 +19,6 @@ import type { LoginForm, LoginRequest } from './types';
 function LoginPage() {
   const router = useRouter();
   const sp = useSearchParams();
-  const redirect = sp.get('redirect') ?? undefined;
   const login = useAuthStore.useLogin();
 
   const methods = useForm<LoginForm>({
@@ -46,8 +45,13 @@ function LoginPage() {
         updatedAt: new Date().toISOString(),
       });
       notifySuccess('Login berhasil');
+      const redirectParam =
+        sp.get('redirect') ??
+        (typeof window !== 'undefined'
+          ? new URLSearchParams(window.location.search).get('redirect')
+          : null);
       const target =
-        redirect ??
+        redirectParam ??
         (res.user.role === 'TUTOR'
           ? '/tutor'
           : res.user.role === 'STUDENT'

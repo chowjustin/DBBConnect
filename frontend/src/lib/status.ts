@@ -90,14 +90,14 @@ export const SESSION_STATUS: Record<SessionStatus, StatusMeta> = {
 };
 
 export const PAYMENT_STATUS: Record<PaymentStatus, StatusMeta> = {
-  UNDER_REVIEW: { label: 'Diperiksa', ...TEAL, icon: Eye },
+  UNDER_REVIEW: { label: 'Diperiksa', ...SKY, icon: Eye },
   CONFIRMED: { label: 'Diterima', ...EMERALD, icon: CheckCircle2 },
   REJECTED: { label: 'Ditolak', ...RED, icon: XCircle },
   REFUNDED: { label: 'Dikembalikan', ...SLATE, icon: Undo2 },
 };
 
 export const PAYOUT_STATUS: Record<PayoutStatus, StatusMeta> = {
-  REQUESTED: { label: 'Diproses', ...TEAL, icon: Send },
+  REQUESTED: { label: 'Diproses', ...SKY, icon: Send },
   PAID: { label: 'Dibayar', ...EMERALD, icon: CheckCircle2 },
   REJECTED: { label: 'Ditolak', ...RED, icon: XCircle },
 };
