@@ -20,6 +20,9 @@ import {
   subjectLabels,
 } from '@/constant/enums';
 import { formatRupiah } from '@/lib/format';
+import { CancelSessionButton } from '@/components/sessions/cancel-session-button';
+import { RescheduleSessionButton } from '@/components/sessions/reschedule-session-button';
+import { WhatsAppButton } from '@/components/ui/whatsapp-button';
 
 import type { SessionItem } from '@/app/student/sessions/types';
 
@@ -39,7 +42,7 @@ function PaymentBadge({
     return (
       <Badge
         variant='secondary'
-        className='border border-emerald-200 bg-emerald-50 text-emerald-700'
+        className='border border-emerald-200 bg-emerald-50 text-emerald-800'
       >
         Lunas
       </Badge>
@@ -49,7 +52,7 @@ function PaymentBadge({
     return (
       <Badge
         variant='secondary'
-        className='border-primary-200 bg-primary-50 text-primary-800 border'
+        className='border border-sky-200 bg-sky-50 text-sky-800'
       >
         Menunggu
       </Badge>
@@ -59,7 +62,7 @@ function PaymentBadge({
     return (
       <Badge
         variant='secondary'
-        className='border border-rose-200 bg-rose-50 text-rose-700'
+        className='border border-red-200 bg-red-50 text-red-800'
       >
         Ditolak
       </Badge>
@@ -68,7 +71,7 @@ function PaymentBadge({
   return (
     <Badge
       variant='secondary'
-      className='border border-amber-200 bg-amber-50 text-amber-700'
+      className='border border-amber-200 bg-amber-50 text-amber-800'
     >
       Belum
     </Badge>
@@ -157,14 +160,42 @@ export function SessionDetailDialog({ session, onOpenChange }: Props) {
                           </div>
                         ) : null}
                       </div>
-                      <PaymentBadge
-                        paid={!!a.paymentId}
-                        status={a.payment?.status}
-                      />
+                      <div className='flex items-center gap-2'>
+                        <WhatsAppButton
+                          phone={a.student?.whatsappNumber}
+                          message={`Halo ${a.student?.user.name ?? 'siswa'}, terkait sesi tutoring kita.`}
+                          size='icon-sm'
+                        />
+                        <PaymentBadge
+                          paid={!!a.paymentId}
+                          status={a.payment?.status}
+                        />
+                      </div>
                     </li>
                   ))
                 )}
               </ul>
+            </div>
+
+            <div className='border-primary-100 flex flex-wrap justify-end gap-2 border-t pt-4'>
+              <RescheduleSessionButton
+                sessionId={s.id}
+                startsAt={s.startsAt}
+                endsAt={s.endsAt}
+                status={s.status}
+              />
+              <CancelSessionButton
+                sessionId={s.id}
+                startsAt={s.startsAt}
+                status={s.status}
+                hasLivePayment={
+                  !!s.attendees?.some(
+                    (a) =>
+                      a.payment?.status === 'UNDER_REVIEW' ||
+                      a.payment?.status === 'CONFIRMED',
+                  )
+                }
+              />
             </div>
           </div>
         ) : null}

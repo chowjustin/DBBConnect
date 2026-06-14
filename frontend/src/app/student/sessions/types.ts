@@ -19,7 +19,7 @@ export interface SessionItem {
   pricePerSeat: number;
   meetingUrl: string | null;
   location: string | null;
-  tutor?: { user: { name: string } };
+  tutor?: { whatsappNumber?: string | null; user: { name: string } };
   attendees?: Array<{
     id: string;
     studentId: string;
@@ -28,7 +28,10 @@ export interface SessionItem {
       id: string;
       status: 'UNDER_REVIEW' | 'CONFIRMED' | 'REJECTED' | 'REFUNDED';
     } | null;
-    student?: { user: { name: string; email?: string } };
+    student?: {
+      whatsappNumber?: string | null;
+      user: { name: string; email?: string };
+    };
   }>;
 }
 

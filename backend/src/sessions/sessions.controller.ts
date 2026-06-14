@@ -19,6 +19,8 @@ import { EmailVerifiedGuard } from '../auth/email-verified.guard';
 import { SessionsService } from './sessions.service';
 import { CreateSessionDto } from './dto/create-session.dto';
 import { UpdateSessionStatusDto } from './dto/update-session-status.dto';
+import { CancelSessionDto } from './dto/cancel-session.dto';
+import { RescheduleSessionDto } from './dto/reschedule-session.dto';
 import { SkipTransform } from '../common/skip-transform.decorator';
 import { PaginationQueryDto } from '../common/dto/pagination.dto';
 import { ListSessionsQueryDto } from './dto/list-sessions.query.dto';
@@ -60,6 +62,32 @@ export class SessionsController {
   @Get('tutor')
   listTutor(@Request() req, @Query() query: ListSessionsQueryDto) {
     return this.svc.listForTutor(req.user.email, query, query.past ?? false);
+  }
+
+  @Roles(UserRole.STUDENT, UserRole.TUTOR)
+  @Patch(':id/cancel')
+  cancel(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() dto: CancelSessionDto,
+  ) {
+    return this.svc.cancel(req.user.sub, req.user.role, id, dto.reason);
+  }
+
+  @Roles(UserRole.STUDENT, UserRole.TUTOR)
+  @Patch(':id/reschedule')
+  reschedule(
+    @Request() req,
+    @Param('id') id: string,
+    @Body() dto: RescheduleSessionDto,
+  ) {
+    return this.svc.reschedule(
+      req.user.sub,
+      req.user.role,
+      id,
+      dto.startsAt,
+      dto.endsAt,
+    );
   }
 
   @SkipTransform()

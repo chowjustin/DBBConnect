@@ -20,7 +20,7 @@ import { StatusBadge } from '@/components/ui/status-badge';
 import { PageHeader } from '@/components/ui/page-header';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { EmptyState } from '@/components/ui/empty-state';
-import { formatDateTimeId } from '@/lib/format';
+import { formatDateId, formatTimeId } from '@/lib/format';
 import { classFormatLabel } from '@/constant/enums';
 import { usePagination } from '@/hooks/use-pagination';
 import type { PaginatedApiResponse } from '@/types/api';
@@ -28,6 +28,8 @@ import type { SessionItem } from '@/app/student/sessions/types';
 
 import { WeekCalendar } from './components/week-calendar';
 import { SessionDetailDialog } from './components/session-detail-dialog';
+import { CancelSessionButton } from '@/components/sessions/cancel-session-button';
+import { RescheduleSessionButton } from '@/components/sessions/reschedule-session-button';
 
 export default function TutorSessionsPage() {
   const { params } = usePagination();
@@ -98,7 +100,8 @@ export default function TutorSessionsPage() {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Mulai</TableHead>
+              <TableHead>Tanggal</TableHead>
+              <TableHead>Waktu</TableHead>
               <TableHead>Format</TableHead>
               <TableHead>Siswa</TableHead>
               <TableHead>Status</TableHead>
@@ -107,7 +110,7 @@ export default function TutorSessionsPage() {
           </TableHeader>
           <TableBody>
             {data?.data.length === 0 ? (
-              <TableEmpty colSpan={5}>Tidak ada sesi.</TableEmpty>
+              <TableEmpty colSpan={6}>Tidak ada sesi.</TableEmpty>
             ) : (
               data?.data.map((s) => {
                 const names =
@@ -117,7 +120,10 @@ export default function TutorSessionsPage() {
                 return (
                   <TableRow key={s.id}>
                     <TableCell className='mono text-xs tabular-nums'>
-                      {formatDateTimeId(s.startsAt)}
+                      {formatDateId(s.startsAt)}
+                    </TableCell>
+                    <TableCell className='mono text-xs tabular-nums'>
+                      {formatTimeId(s.startsAt)} – {formatTimeId(s.endsAt)}
                     </TableCell>
                     <TableCell>{classFormatLabel(s.format)}</TableCell>
                     <TableCell>
@@ -138,15 +144,40 @@ export default function TutorSessionsPage() {
                       <StatusBadge kind='session' status={s.status} />
                     </TableCell>
                     <TableCell className='text-right'>
-                      <Button
-                        type='button'
-                        variant='ghost'
-                        size='icon-sm'
-                        aria-label='Lihat detail'
-                        onClick={() => setSelected(s)}
-                      >
-                        <Eye className='size-4' />
-                      </Button>
+                      <div className='flex items-center justify-end gap-2'>
+                        {(() => {
+                          const hasLivePayment = !!s.attendees?.some(
+                            (a) =>
+                              a.payment?.status === 'UNDER_REVIEW' ||
+                              a.payment?.status === 'CONFIRMED',
+                          );
+                          return (
+                            <>
+                              <RescheduleSessionButton
+                                sessionId={s.id}
+                                startsAt={s.startsAt}
+                                endsAt={s.endsAt}
+                                status={s.status}
+                              />
+                              <CancelSessionButton
+                                sessionId={s.id}
+                                startsAt={s.startsAt}
+                                status={s.status}
+                                hasLivePayment={hasLivePayment}
+                              />
+                            </>
+                          );
+                        })()}
+                        <Button
+                          type='button'
+                          variant='ghost'
+                          size='icon-sm'
+                          aria-label='Lihat detail'
+                          onClick={() => setSelected(s)}
+                        >
+                          <Eye className='size-4' />
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 );

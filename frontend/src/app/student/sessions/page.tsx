@@ -6,6 +6,9 @@ import { useQuery } from '@tanstack/react-query';
 import api from '@/lib/api';
 import useAuthStore from '@/store/use-auth-store';
 import { Badge } from '@/components/ui/badge';
+import { CancelSessionButton } from '@/components/sessions/cancel-session-button';
+import { RescheduleSessionButton } from '@/components/sessions/reschedule-session-button';
+import { WhatsAppButton } from '@/components/ui/whatsapp-button';
 import { Button } from '@/components/ui/button';
 import { PaymentCheckoutModal } from '@/components/checkout/payment-checkout-modal';
 import {
@@ -18,7 +21,7 @@ import {
 } from '@/components/ui/table';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/status-badge';
-import { formatDateTimeId, formatRupiah } from '@/lib/format';
+import { formatDateId, formatRupiah, formatTimeId } from '@/lib/format';
 import { classFormatLabel } from '@/constant/enums';
 import { usePagination } from '@/hooks/use-pagination';
 import { apiUrl } from '@/constant/env';
@@ -113,7 +116,8 @@ export default function StudentSessionsPage() {
           <TableHeader>
             <TableRow>
               <TableHead>Tutor</TableHead>
-              <TableHead>Mulai</TableHead>
+              <TableHead>Tanggal</TableHead>
+              <TableHead>Waktu</TableHead>
               <TableHead>Format</TableHead>
               <TableHead>Status</TableHead>
               <TableHead>Harga</TableHead>
@@ -132,8 +136,22 @@ export default function StudentSessionsPage() {
                 (!paymentStatus || paymentStatus === 'REJECTED');
               return (
                 <TableRow key={s.id}>
-                  <TableCell>{s.tutor?.user.name ?? '—'}</TableCell>
-                  <TableCell>{formatDateTimeId(s.startsAt)}</TableCell>
+                  <TableCell>
+                    <div className='flex items-center gap-2'>
+                      <span>{s.tutor?.user.name ?? '—'}</span>
+                      <WhatsAppButton
+                        phone={s.tutor?.whatsappNumber}
+                        message={`Halo ${s.tutor?.user.name ?? 'tutor'}, terkait sesi tutoring kita.`}
+                        size='icon-sm'
+                      />
+                    </div>
+                  </TableCell>
+                  <TableCell className='mono text-xs tabular-nums'>
+                    {formatDateId(s.startsAt)}
+                  </TableCell>
+                  <TableCell className='mono text-xs tabular-nums'>
+                    {formatTimeId(s.startsAt)} – {formatTimeId(s.endsAt)}
+                  </TableCell>
                   <TableCell>{classFormatLabel(s.format)}</TableCell>
                   <TableCell>
                     <div className='flex items-center gap-2'>
@@ -189,6 +207,24 @@ export default function StudentSessionsPage() {
                           <Star className='size-3.5' /> Ulasan
                         </Button>
                       ) : null}
+                      <RescheduleSessionButton
+                        sessionId={s.id}
+                        startsAt={s.startsAt}
+                        endsAt={s.endsAt}
+                        status={s.status}
+                      />
+                      <CancelSessionButton
+                        sessionId={s.id}
+                        startsAt={s.startsAt}
+                        status={s.status}
+                        hasLivePayment={
+                          !!s.attendees?.some(
+                            (a) =>
+                              a.payment?.status === 'UNDER_REVIEW' ||
+                              a.payment?.status === 'CONFIRMED',
+                          )
+                        }
+                      />
                     </div>
                   </TableCell>
                 </TableRow>
@@ -238,7 +274,7 @@ function PaymentBadge({
     return (
       <Badge
         variant='secondary'
-        className='border border-emerald-200 bg-emerald-50 text-emerald-700'
+        className='border border-emerald-200 bg-emerald-50 text-emerald-800'
       >
         Lunas
       </Badge>
@@ -248,7 +284,7 @@ function PaymentBadge({
     return (
       <Badge
         variant='secondary'
-        className='border-primary-200 bg-primary-50 text-primary-800 border'
+        className='border border-sky-200 bg-sky-50 text-sky-800'
       >
         Menunggu Konfirmasi
       </Badge>
@@ -258,7 +294,7 @@ function PaymentBadge({
     return (
       <Badge
         variant='secondary'
-        className='border border-rose-200 bg-rose-50 text-rose-700'
+        className='border border-red-200 bg-red-50 text-red-800'
       >
         Pembayaran Ditolak
       </Badge>
@@ -277,7 +313,7 @@ function PaymentBadge({
   return (
     <Badge
       variant='secondary'
-      className='border border-amber-200 bg-amber-50 text-amber-700'
+      className='border border-amber-200 bg-amber-50 text-amber-800'
     >
       Belum Bayar
     </Badge>
