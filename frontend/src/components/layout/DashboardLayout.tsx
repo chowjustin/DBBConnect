@@ -1,6 +1,6 @@
 'use client';
 
-import { LogOut } from 'lucide-react';
+import { LogOut, User as UserIcon } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
@@ -159,6 +159,13 @@ export function DashboardLayout({
                   {user.email}
                 </div>
               </DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/${role.toLowerCase()}/profile`}>
+                  <UserIcon className='size-4' />
+                  Profil
+                </Link>
+              </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleLogout}>
                 <LogOut className='size-4' />

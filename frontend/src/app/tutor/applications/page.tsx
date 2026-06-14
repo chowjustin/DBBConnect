@@ -2,21 +2,17 @@
 
 import * as React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { Mail, Users } from 'lucide-react';
 
 import api from '@/lib/api';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableEmpty,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { WhatsAppButton } from '@/components/ui/whatsapp-button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { StatusBadge } from '@/components/ui/status-badge';
+import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { EmptyState } from '@/components/ui/empty-state';
+import { PageHeader } from '@/components/ui/page-header';
 import { formatDateId } from '@/lib/format';
 import { usePagination } from '@/hooks/use-pagination';
 import type { PaginatedApiResponse } from '@/types/api';
@@ -29,12 +25,18 @@ interface ApplicationRow {
   status: ApplicationStatus;
   message: string | null;
   createdAt: string;
-  student: { user: { name: string; email: string } };
+  student: {
+    whatsappNumber: string | null;
+    user: { name: string; email: string };
+  };
 }
+
+type Tab = 'accepted' | 'pending' | 'history';
 
 export default function TutorApplicationsPage() {
   const { params } = usePagination();
   const updateStatus = useUpdateApplicationStatus();
+  const [tab, setTab] = React.useState<Tab>('accepted');
   const [acceptTarget, setAcceptTarget] = React.useState<{
     id: string;
     name: string;
@@ -44,86 +46,135 @@ export default function TutorApplicationsPage() {
     name: string;
   } | null>(null);
 
+  const statusParam =
+    tab === 'accepted'
+      ? 'ACCEPTED'
+      : tab === 'pending'
+        ? 'PENDING'
+        : 'REJECTED';
+
   const { data, isLoading } = useQuery<{
     data: ApplicationRow[];
     meta: PaginatedApiResponse<ApplicationRow[]>['meta'];
   }>({
-    queryKey: ['/applications/tutor', params],
+    queryKey: ['/applications/tutor', params, statusParam],
     queryFn: async () => {
-      const res = await api.get('/applications/tutor', { params });
+      const res = await api.get('/applications/tutor', {
+        params: { ...params, status: statusParam },
+      });
       return res.data;
     },
   });
 
+  const rows = data?.data ?? [];
+
   return (
-    <div className='space-y-4'>
-      <h1 className='h2'>Aplikasi Siswa</h1>
+    <div className='space-y-6'>
+      <PageHeader
+        icon={Users}
+        title='Siswa Saya'
+        description='Kelola permintaan siswa yang ingin belajar dengan Anda.'
+      />
+
+      <Tabs value={tab} onValueChange={(v) => setTab(v as Tab)}>
+        <TabsList>
+          <TabsTrigger value='accepted'>Aktif</TabsTrigger>
+          <TabsTrigger value='pending'>Permintaan</TabsTrigger>
+          <TabsTrigger value='history'>Riwayat</TabsTrigger>
+        </TabsList>
+      </Tabs>
+
       {isLoading ? (
-        <Skeleton className='h-40 w-full' />
+        <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+          {Array.from({ length: 3 }).map((_, i) => (
+            <Skeleton key={i} className='h-40 rounded-lg' />
+          ))}
+        </div>
+      ) : rows.length === 0 ? (
+        <EmptyState
+          icon={Users}
+          title={
+            tab === 'accepted'
+              ? 'Belum ada siswa aktif'
+              : tab === 'pending'
+                ? 'Tidak ada permintaan baru'
+                : 'Belum ada riwayat'
+          }
+          description={
+            tab === 'accepted'
+              ? 'Siswa yang Anda terima akan muncul di sini.'
+              : tab === 'pending'
+                ? 'Permintaan siswa baru akan muncul di sini untuk Anda tinjau.'
+                : 'Aplikasi yang ditolak akan muncul di sini.'
+          }
+        />
       ) : (
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Siswa</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Pesan</TableHead>
-              <TableHead>Tanggal</TableHead>
-              <TableHead></TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {data?.data.length === 0 ? (
-              <TableEmpty colSpan={5}>Belum ada aplikasi siswa.</TableEmpty>
-            ) : (
-              data?.data.map((app) => (
-                <TableRow key={app.id}>
-                  <TableCell>
-                    <div>{app.student.user.name}</div>
-                    <div className='text-muted-foreground text-xs'>
-                      {app.student.user.email}
-                    </div>
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge kind='application' status={app.status} />
-                  </TableCell>
-                  <TableCell className='max-w-xs truncate'>
-                    {app.message ?? '—'}
-                  </TableCell>
-                  <TableCell>{formatDateId(app.createdAt)}</TableCell>
-                  <TableCell>
-                    {app.status === 'PENDING' ? (
-                      <div className='flex gap-2'>
-                        <Button
-                          size='sm'
-                          onClick={() =>
-                            setAcceptTarget({
-                              id: app.id,
-                              name: app.student.user.name,
-                            })
-                          }
-                        >
-                          Terima
-                        </Button>
-                        <Button
-                          size='sm'
-                          variant='destructive'
-                          onClick={() =>
-                            setRejectTarget({
-                              id: app.id,
-                              name: app.student.user.name,
-                            })
-                          }
-                        >
-                          Tolak
-                        </Button>
-                      </div>
-                    ) : null}
-                  </TableCell>
-                </TableRow>
-              ))
-            )}
-          </TableBody>
-        </Table>
+        <div className='grid gap-3 sm:grid-cols-2 lg:grid-cols-3'>
+          {rows.map((app) => (
+            <article
+              key={app.id}
+              className='border-primary-100 hover:border-primary-300 hover:shadow-primary-500/5 flex flex-col gap-3 rounded-lg border bg-white p-4 transition-all hover:shadow-md'
+            >
+              <div className='flex items-start justify-between gap-2'>
+                <div className='from-primary-400 to-primary-600 flex size-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br text-sm font-bold text-white'>
+                  {app.student.user.name.charAt(0).toUpperCase()}
+                </div>
+                <StatusBadge kind='application' status={app.status} size='sm' />
+              </div>
+              <div className='min-w-0 flex-1'>
+                <div className='truncate font-semibold'>
+                  {app.student.user.name}
+                </div>
+                <div className='text-muted-foreground inline-flex items-center gap-1 truncate text-xs'>
+                  <Mail className='size-3' />
+                  {app.student.user.email}
+                </div>
+                {app.message ? (
+                  <p className='text-muted-foreground mt-2 line-clamp-2 text-xs'>
+                    “{app.message}”
+                  </p>
+                ) : null}
+                <div className='text-muted-foreground mono mt-2 text-[11px] tabular-nums'>
+                  {formatDateId(app.createdAt)}
+                </div>
+              </div>
+              <div className='mt-auto flex flex-wrap gap-2'>
+                {app.status === 'PENDING' ? (
+                  <>
+                    <Button
+                      size='sm'
+                      onClick={() =>
+                        setAcceptTarget({
+                          id: app.id,
+                          name: app.student.user.name,
+                        })
+                      }
+                    >
+                      Terima
+                    </Button>
+                    <Button
+                      size='sm'
+                      variant='destructive'
+                      onClick={() =>
+                        setRejectTarget({
+                          id: app.id,
+                          name: app.student.user.name,
+                        })
+                      }
+                    >
+                      Tolak
+                    </Button>
+                  </>
+                ) : app.status === 'ACCEPTED' ? (
+                  <WhatsAppButton
+                    phone={app.student.whatsappNumber}
+                    message={`Halo ${app.student.user.name}, saya tutor Anda di TutorConnect.`}
+                  />
+                ) : null}
+              </div>
+            </article>
+          ))}
+        </div>
       )}
 
       <ConfirmDialog
